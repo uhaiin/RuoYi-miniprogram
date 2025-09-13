@@ -64,7 +64,7 @@ spring:
   devtools:
     restart:
       # 热部署开关
-      enabled: true
+      enabled: false
   data:
     # redis 配置
     redis:
@@ -94,7 +94,7 @@ token:
   # 令牌自定义标识
   header: Authorization
   # 令牌密钥
-  secret: abcdefghijklmnopqrstuvwxyz
+  secret: ad05ae01-f977-0fdc-fcd1-95c6e6e7de6e
   # 令牌有效期（默认30分钟）
   expireTime: 30
 
@@ -118,11 +118,16 @@ springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
+    # 生产不能开启 swagger
     enabled: true
     path: /swagger-ui.html
     tags-sorter: alpha
   group-configs:
     - group: 'default'
+      display-name: '微信模块'
+      paths-to-match: '/**'
+      packages-to-scan: com.ruoyi.web.controller.wechat
+    - group: 'test'
       display-name: '测试模块'
       paths-to-match: '/**'
       packages-to-scan: com.ruoyi.web.controller.tool
