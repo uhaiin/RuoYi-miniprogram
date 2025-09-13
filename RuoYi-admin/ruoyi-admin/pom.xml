@@ -42,6 +42,12 @@
             <artifactId>ruoyi-framework</artifactId>
         </dependency>
 
+        <!--微信模块-->
+        <dependency>
+            <groupId>com.ruoyi</groupId>
+            <artifactId>ruoyi-wechat</artifactId>
+        </dependency>
+
         <!-- 定时任务-->
         <dependency>
             <groupId>com.ruoyi</groupId>
