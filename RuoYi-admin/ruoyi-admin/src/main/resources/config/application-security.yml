@@ -1,0 +1,32 @@
+# token配置
+token:
+  # 令牌自定义标识
+  header: Authorization
+  # 令牌密钥
+  secret: ad05ae01-f977-0fdc-fcd1-95c6e6e7de6e
+  # 令牌有效期（默认30分钟）
+  expireTime: 30
+
+# 防盗链配置
+referer:
+  # 防盗链开关
+  enabled: true
+  # 允许的域名列表
+  allowed-domains: localhost,127.0.0.1
+
+# 防止XSS攻击
+xss:
+  # 过滤开关
+  enabled: true
+  # 排除链接（多个用逗号分隔）
+  excludes: /system/notice
+  # 匹配链接
+  urlPatterns: /system/*,/monitor/*,/tool/*
+
+# 用户配置
+user:
+  password:
+    # 密码最大错误次数
+    maxRetryCount: 5
+    # 密码锁定时间（默认10分钟）
+    lockTime: 10

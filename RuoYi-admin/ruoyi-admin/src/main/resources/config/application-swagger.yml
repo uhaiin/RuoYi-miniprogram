@@ -1,0 +1,15 @@
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+  group-configs:
+    - group: 'default'
+      display-name: '微信模块'
+      paths-to-match: '/**'
+      packages-to-scan: com.ruoyi.web.controller.wechat
+    - group: 'test'
+      display-name: '测试模块'
+      paths-to-match: '/**'
+      packages-to-scan: com.ruoyi.web.controller.tool
