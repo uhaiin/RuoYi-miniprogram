@@ -1,6 +1,5 @@
-name: Build RuoYi-admin
+name: Build RuoYi-admin (Multi-module)
 
-# 触发条件：当RuoYi-admin目录有代码提交时触发
 on:
   push:
     paths:
@@ -11,15 +10,15 @@ on:
 
 jobs:
   build:
-    # 在最新的Ubuntu环境下运行
     runs-on: ubuntu-latest
     
     steps:
-      # 检出代码仓库
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # 设置Java 21环境
+      - name: Install tree (for directory inspection)
+        run: sudo apt-get install -y tree
+      
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
@@ -27,14 +26,55 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
-      # 执行Maven打包，跳过测试
-      - name: Build with Maven
+      - name: Show project structure
         working-directory: ./RuoYi-admin
-        run: mvn clean package -DskipTests
+        run: |
+          echo "Project structure (RuoYi-admin root):"
+          tree -L 4  # 显示4级目录，便于查看子模块结构
       
-      # 可选：保存打包结果作为 artifacts
+      - name: Build all modules with Maven
+        working-directory: ./RuoYi-admin
+        run: |
+          # 从父模块构建所有子模块
+          mvn clean package -DskipTests
+          # 查看构建结果摘要
+          echo "Build summary:"
+          mvn help:evaluate -Dexpression=project.modules | grep -v "\[INFO\]"
+      
+      - name: Find submodule jar files
+        id: find_jars
+        working-directory: ./RuoYi-admin
+        run: |
+          # 查找所有子模块中的jar文件，排除测试相关和父模块（pom）
+          echo "Found jar files in submodules:"
+          find . -type f -name "*.jar" \
+            -not -path "*/target/test-classes/*" \
+            -not -path "*/target/*-tests.jar"
+          
+          # 保存jar文件路径到环境变量
+          echo "JAR_PATHS=$(find . -type f -name "*.jar" \
+            -not -path "*/target/test-classes/*" \
+            -not -path "*/target/*-tests.jar" | tr '\n' ' ')" >> $GITHUB_ENV
+      
+      - name: List found jar files
+        if: env.JAR_PATHS != ''
+        working-directory: ./RuoYi-admin
+        run: |
+          echo "Jar files to be uploaded:"
+          echo $JAR_PATHS | tr ' ' '\n'
+      
       - name: Upload build artifacts
+        if: env.JAR_PATHS != ''
         uses: actions/upload-artifact@v4
         with:
-          name: ruoyi-admin-build
-          path: RuoYi-admin/target/*.jar
+          name: ruoyi-admin-submodules-build
+          path: |
+            ${{ env.JAR_PATHS }}
+      
+      - name: Handle missing jars
+        if: env.JAR_PATHS == ''
+        run: |
+          echo "Warning: No jar files found in submodules"
+          echo "Check Maven build logs for possible errors"
+          # 可选：如果希望构建失败，取消下面这行的注释
+          # exit 1
