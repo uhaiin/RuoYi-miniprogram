@@ -1,2 +1,2 @@
 # 基于若依框架 SpringBoot3 开发的后端
-# jdk 21
+# ci
