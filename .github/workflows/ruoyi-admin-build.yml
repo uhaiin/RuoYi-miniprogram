@@ -1,4 +1,4 @@
-name: RuoYi-admin 代码打包流水线
+name: 打包 RuoYi-admin 生产版本
 
 permissions:
   contents: write
