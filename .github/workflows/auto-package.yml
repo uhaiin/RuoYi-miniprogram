@@ -1,75 +1,41 @@
-name: Build RuoYi-admin (Multi-module)
+name: Build RuoYi-admin Module
 
-on:
-  push:
-    paths:
-      - 'RuoYi-admin/**'
-  pull_request:
-    paths:
-      - 'RuoYi-admin/**'
+    # 触发条件：当RuoYi-admin目录下有代码提交时触发
+    on:
+      push:
+        paths:
+          - 'RuoYi-admin/**'
+      pull_request:
+        paths:
+          - 'RuoYi-admin/**'
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+    jobs:
+      build:
+        # 在Ubuntu最新版本上运行
+        runs-on: ubuntu-latest
+
+        steps:
+          # 检出代码仓库
+          - name: Checkout code
+            uses: actions/checkout@v4
+
+          # 设置Java 21环境
+          - name: Set up JDK 21
+            uses: actions/setup-java@v4
+            with:
+              java-version: '21'
+              distribution: 'temurin'
+              cache: maven
+
+          # 打包RuoYi-admin目录下的ruoyi-admin模块，跳过测试
+          - name: Build ruoyi-admin module
+            working-directory: ./RuoYi-admin/ruoyi-admin
+            run: mvn clean package -DskipTests
+
+          # 上传打包产物（可选步骤）
+          - name: Upload build artifact
+            uses: actions/upload-artifact@v4
+            with:
+              name: ruoyi-admin-build
+              path: RuoYi-admin/ruoyi-admin/target/*.jar
     
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Install tree
-        run: sudo apt-get install -y tree
-      
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
-      
-      - name: Show project structure
-        working-directory: ./RuoYi-admin
-        run: tree -L 4
-      
-      - name: Build all modules with Maven
-        working-directory: ./RuoYi-admin
-        run: mvn clean package -DskipTests
-      
-      - name: Find submodule jar files
-        id: find_jars
-        working-directory: ./RuoYi-admin
-        run: |
-          # 查找所有jar文件并保存到文件
-          find . -type f -name "*.jar" \
-            -not -path "*/target/test-classes/*" \
-            -not -path "*/target/*-tests.jar" > jar_paths.txt
-          
-          # 显示找到的jar文件
-          echo "Found jar files:"
-          cat jar_paths.txt
-          
-          # 检查是否找到jar文件
-          if [ -s jar_paths.txt ]; then
-            echo "HAS_JARS=true" >> $GITHUB_ENV
-          else
-            echo "HAS_JARS=false" >> $GITHUB_ENV
-          fi
-      
-      - name: Upload build artifacts
-        if: env.HAS_JARS == 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ruoyi-admin-submodules-build
-          path: |
-            ${{ github.workspace }}/RuoYi-admin/ruoyi-generator/target/ruoyi-generator-3.9.0.jar
-            ${{ github.workspace }}/RuoYi-admin/ruoyi-quartz/target/ruoyi-quartz-3.9.0.jar
-            ${{ github.workspace }}/RuoYi-admin/ruoyi-framework/target/ruoyi-framework-3.9.0.jar
-            ${{ github.workspace }}/RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar
-            ${{ github.workspace }}/RuoYi-admin/ruoyi-common/target/ruoyi-common-3.9.0.jar
-            ${{ github.workspace }}/RuoYi-admin/ruoyi-system/target/ruoyi-system-3.9.0.jar
-            ${{ github.workspace }}/RuoYi-admin/ruoyi-wechat/target/ruoyi-wechat-3.9.0.jar
-      
-      - name: Handle missing jars
-        if: env.HAS_JARS == 'false'
-        run: |
-          echo "Warning: No jar files found in submodules"
-          exit 1
