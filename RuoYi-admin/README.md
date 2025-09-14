@@ -3,5 +3,3 @@
 # redis
 # mysql
 # swagger
-# 登录验证
-# 权限管理
