@@ -3,49 +3,47 @@ name: 构建并部署 RuoYi-vue3
 permissions:
   contents: write
 
-# 触发条件：当有代码推送到main分支或向main分支发起合并请求时
 on:
   push:
     branches: [ "main" ]
     paths:
-      - 'RuoYi-vue3/**'  # 只监控 RuoYi-vue3 目录的变动
+      - 'RuoYi-vue3/**'
   pull_request:
     branches: [ "main" ]
     paths:
-      - 'RuoYi-vue3/**'  # 只监控 RuoYi-vue3 目录的变动
+      - 'RuoYi-vue3/**'
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest  # 使用Ubuntu系统运行
+    runs-on: ubuntu-latest
 
     steps:
     - name: 拉取代码
-      uses: actions/checkout@v3  # 拉取当前仓库代码
+      uses: actions/checkout@v3
 
     - name: 设置 Node.js 环境
       uses: actions/setup-node@v3
       with:
-        node-version: '22'  # 已更新为 Node.js 22 版本
-        cache: 'yarn'       # 缓存yarn依赖，加速构建
+        node-version: '22'
+        cache: 'yarn'
+        # 指定yarn.lock的实际路径
+        cache-dependency-path: './RuoYi-vue3/yarn.lock'
 
     - name: 安装依赖
-      working-directory: ./RuoYi-vue3  # 切换到RuoYi-vue3目录
-      run: yarn install --frozen-lockfile  # 安装项目依赖
+      working-directory: ./RuoYi-vue3
+      run: yarn install --frozen-lockfile  # 现在可以安全使用lockfile选项了
 
     - name: 执行打包命令
       working-directory: ./RuoYi-vue3
-      run: yarn build:prod  # 执行生产环境打包
+      run: yarn build:prod
 
     - name: 复制dist目录到deploy
       run: |
-        # 创建deploy目录（如果不存在）
         mkdir -p ./deploy
-        # 复制打包后的dist目录内容到deploy目录
         cp -r ./RuoYi-vue3/dist/* ./deploy/
 
     - name: 删除打包产物
       run: |
-        # 检查dist目录是否存在，如果存在则删除
         if [ -d "./RuoYi-vue3/dist" ]; then
           rm -rf ./RuoYi-vue3/dist
           echo "已删除打包产物"
@@ -54,7 +52,7 @@ jobs:
         fi
 
     - name: 提交部署文件
-      if: github.event_name == 'push'  # 只在push事件时提交更改
+      if: github.event_name == 'push'
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'actions@github.com'
@@ -62,4 +60,3 @@ jobs:
         CURRENT_TIME=$(TZ='Asia/Shanghai' date +"%Y-%m-%d %H:%M:%S")
         git commit -m "ci(package): ${CURRENT_TIME} upload ruoyi-vue3 dist to root deploy folder" || echo "没有需要提交的更改"
         git push
-
