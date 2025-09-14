@@ -18,6 +18,12 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 @Configuration
 @EnableCaching
 public class RedisConfig extends CachingConfigurerSupport {
+    /**
+     * 创建并配置RedisTemplate实例
+     *
+     * @param connectionFactory Redis连接工厂，用于创建Redis连接
+     * @return 配置好的RedisTemplate实例，用于操作Redis数据库
+     */
     @Bean
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory connectionFactory) {
@@ -26,17 +32,18 @@ public class RedisConfig extends CachingConfigurerSupport {
 
         FastJson2JsonRedisSerializer serializer = new FastJson2JsonRedisSerializer(Object.class);
 
-        // 使用StringRedisSerializer来序列化和反序列化redis的key值
+        // 配置Redis的key和value序列化方式
         template.setKeySerializer(new StringRedisSerializer());
         template.setValueSerializer(serializer);
 
-        // Hash的key也采用StringRedisSerializer的序列化方式
+        // 配置Redis Hash结构的key和value序列化方式
         template.setHashKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(serializer);
 
         template.afterPropertiesSet();
         return template;
     }
+
 
     @Bean
     public DefaultRedisScript<Long> limitScript() {
@@ -50,17 +57,18 @@ public class RedisConfig extends CachingConfigurerSupport {
      * 限流脚本
      */
     private String limitScriptText() {
-        return "local key = KEYS[1]\n" +
-                "local count = tonumber(ARGV[1])\n" +
-                "local time = tonumber(ARGV[2])\n" +
-                "local current = redis.call('get', key);\n" +
-                "if current and tonumber(current) > count then\n" +
-                "    return tonumber(current);\n" +
-                "end\n" +
-                "current = redis.call('incr', key)\n" +
-                "if tonumber(current) == 1 then\n" +
-                "    redis.call('expire', key, time)\n" +
-                "end\n" +
-                "return tonumber(current);";
+        return """
+                local key = KEYS[1]
+                local count = tonumber(ARGV[1])
+                local time = tonumber(ARGV[2])
+                local current = redis.call('get', key);
+                if current and tonumber(current) > count then
+                    return tonumber(current);
+                end
+                current = redis.call('incr', key)
+                if tonumber(current) == 1 then
+                    redis.call('expire', key, time)
+                end
+                return tonumber(current);""";
     }
 }
