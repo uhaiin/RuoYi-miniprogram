@@ -34,7 +34,7 @@ jobs:
         working-directory: ./RuoYi-admin
         run: mvn clean package -DskipTests
       
-      - name: Find submodules and jar files
+      - name: Find submodules and prepare jar paths
         id: find_modules
         working-directory: ./RuoYi-admin
         run: |
@@ -45,7 +45,15 @@ jobs:
           echo "Found submodules:"
           cat modules.txt
           
-          # 为每个模块生成jar路径模式
+          # 检查是否有模块
+          if [ -s modules.txt ]; then
+            echo "HAS_MODULES=true" >> $GITHUB_ENV
+          else
+            echo "HAS_MODULES=false" >> $GITHUB_ENV
+            exit 0
+          fi
+          
+          # 为每个模块生成jar路径模式并保存到文件
           echo "Generating jar path patterns..."
           > jar_patterns.txt
           while IFS= read -r module; do
@@ -57,35 +65,22 @@ jobs:
           # 显示生成的路径模式
           echo "Generated jar path patterns:"
           cat jar_patterns.txt
-          
-          # 将路径模式转换为GitHub Actions的多行格式
-          patterns=$(cat jar_patterns.txt | tr '\n' '|' | sed 's/|$//')
-          echo "PATTERNS=$patterns" >> $GITHUB_ENV
-          
-          # 检查是否有模块
-          if [ -s modules.txt ]; then
-            echo "HAS_MODULES=true" >> $GITHUB_ENV
-          else
-            echo "HAS_MODULES=false" >> $GITHUB_ENV
-          fi
       
       - name: List all found jar files
         if: env.HAS_MODULES == 'true'
-        working-directory: ./RuoYi-admin
         run: |
           echo "All jar files found in modules:"
           while IFS= read -r pattern; do
             echo "Searching in: $pattern"
-            find $(dirname "$pattern") -maxdepth 1 -name "$(basename "$pattern")"
-          done < jar_patterns.txt
+            find $(dirname "$pattern") -maxdepth 2 -name "$(basename "$pattern")"
+          done < ${{ github.workspace }}/RuoYi-admin/jar_patterns.txt
       
-      - name: Upload build artifacts
+      - name: Upload build artifacts using file patterns
         if: env.HAS_MODULES == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: ruoyi-admin-modules-build
-          path: |
-            ${{ env.PATTERNS }}
+          path-file: ${{ github.workspace }}/RuoYi-admin/jar_patterns.txt
       
       - name: Handle no modules found
         if: env.HAS_MODULES == 'false'
