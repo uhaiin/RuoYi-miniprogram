@@ -1,15 +1,17 @@
-name: RuoYi-admin 自动打包（修复版）
+name: RuoYi-admin 自动打包（增强调试版）
 
 on:
   push:
     branches: [ "main" ]
     paths:
       - 'RuoYi-admin/**'
+      - 'ruoyi-admin/**'  # 兼容可能的小写目录名
       - '.github/workflows/auto-package-ruoyi-admin.yml'
   pull_request:
     branches: [ "main" ]
     paths:
       - 'RuoYi-admin/**'
+      - 'ruoyi-admin/**'  # 兼容可能的小写目录名
       - '.github/workflows/auto-package-ruoyi-admin.yml'
 
 jobs:
@@ -20,35 +22,68 @@ jobs:
     - name: 拉取代码
       uses: actions/checkout@v4
 
+    - name: 【关键检查】确认项目目录结构
+      run: |
+        echo "===== 根目录所有文件和文件夹 ====="
+        ls -la
+        echo "===== 检查可能的Java项目目录 ====="
+        # 检查大小写两种可能的目录名
+        if [ -d "RuoYi-admin" ]; then
+          echo "找到 RuoYi-admin 目录"
+          echo "RuoYi-admin 目录内容："
+          ls -la RuoYi-admin/
+          # 检查是否有 pom.xml
+          if [ -f "RuoYi-admin/pom.xml" ]; then
+            echo "RuoYi-admin 目录下存在 pom.xml"
+            PROJECT_DIR="RuoYi-admin"
+          else
+            echo "ERROR: RuoYi-admin 目录下没有 pom.xml 文件"
+            exit 1
+          fi
+        elif [ -d "ruoyi-admin" ]; then
+          echo "找到 ruoyi-admin 目录（小写）"
+          echo "ruoyi-admin 目录内容："
+          ls -la ruoyi-admin/
+          if [ -f "ruoyi-admin/pom.xml" ]; then
+            echo "ruoyi-admin 目录下存在 pom.xml"
+            PROJECT_DIR="ruoyi-admin"
+          else
+            echo "ERROR: ruoyi-admin 目录下没有 pom.xml 文件"
+            exit 1
+          fi
+        else
+          echo "ERROR: 未找到 RuoYi-admin 或 ruoyi-admin 目录"
+          exit 1
+        fi
+        # 保存项目目录路径到环境变量，供后续步骤使用
+        echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
     - name: 配置 JDK 21
       uses: actions/setup-java@v4
       with:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-        cache-dependency-path: RuoYi-admin/pom.xml
+        cache-dependency-path: ${{ env.PROJECT_DIR }}/pom.xml
 
-    - name: 查看项目结构（调试用）
+    - name: 【详细日志】Maven 构建与打包
+      working-directory: ./${{ env.PROJECT_DIR }}
       run: |
-        echo "当前目录结构："
-        ls -l
-        echo "RuoYi-admin目录内容："
-        ls -l RuoYi-admin/
-
-    - name: 构建并打包（带详细日志）
-      working-directory: ./RuoYi-admin
-      run: |
-        echo "开始构建项目..."
-        mvn -X clean package -DskipTests  # -X 输出详细日志，便于排查错误
-        echo "构建完成，查看target目录："
-        ls -l target/  # 显示target目录内容，确认是否生成JAR
+        echo "===== 开始 Maven 构建 ====="
+        # 先尝试清理并下载依赖（单独步骤，便于排查依赖问题）
+        mvn -X clean dependency:resolve
+        # 再执行打包（保留错误日志）
+        mvn -X clean package -DskipTests || {
+          echo "===== 打包失败，查看 target 目录状态 ====="
+          ls -la target/ 2>/dev/null || echo "target 目录仍不存在"
+          exit 1
+        }
+        echo "===== 打包成功，查看 target 目录内容 ====="
+        ls -la target/
 
     - name: 保存打包产物
       uses: actions/upload-artifact@v4
       with:
         name: ruoyi-admin-app-${{ github.sha }}
-        # 尝试匹配可能的JAR路径（多模块项目常用）
-        path: |
-          RuoYi-admin/target/*.jar
-          RuoYi-admin/**/target/*.jar  # 适配子模块结构
+        path: ${{ env.PROJECT_DIR }}/target/*.jar
         retention-days: 30
