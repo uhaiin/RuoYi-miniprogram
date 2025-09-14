@@ -39,5 +39,5 @@ jobs:
         with:
           name: ruoyi-admin-packages  # 产物压缩包名称
           path: |
-            ./RuoYi-admin/ruoyi-admin/target/*.jar  # 子模块 ruoyi-admin 的 Jar 包路径
-            ./RuoYi-admin/**/target/*.jar  # （可选）如需所有子模块产物，保留此句
+            /home/runner/work/RuoYi-miniprogram/RuoYi-miniprogram/RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar
+            # ./RuoYi-admin/**/target/*.jar  # （可选）如需所有子模块产物，保留此句
