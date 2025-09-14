@@ -2,3 +2,4 @@
 # jdk 21
 # redis
 # mysql
+# swagger
