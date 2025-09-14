@@ -39,8 +39,8 @@ jobs:
 
     - name: 复制dist目录到deploy
       run: |
-        mkdir -p ./deploy
-        cp -r ./RuoYi-vue3/dist/* ./deploy/
+        mkdir -p ./deploy/dist
+        cp -r ./RuoYi-vue3/dist/* ./deploy/dist/
 
     - name: 删除打包产物
       run: |
