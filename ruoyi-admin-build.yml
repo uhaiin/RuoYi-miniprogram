@@ -1,0 +1,43 @@
+name: RuoYi-admin 代码打包流水线
+
+# 触发条件：监控 RuoYi-admin 目录的提交和合并请求
+on:
+  push:
+    branches: [ main ]  # 替换为你的实际分支（如开发分支 dev）
+    paths:
+      - 'RuoYi-admin/**'  # 仅当该目录下代码变更时触发
+  pull_request:
+    branches: [ main ]  # 替换为你的实际分支
+    paths:
+      - 'RuoYi-admin/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest  # 运行环境（Ubuntu 最新版）
+    
+    steps:
+      # 步骤1：检出 GitHub 仓库代码
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      # 步骤2：配置 JDK 21 环境
+      - name: 配置 JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'  # 推荐使用 Adoptium Temurin JDK（稳定且常用）
+          cache: maven  # 缓存 Maven 依赖，加速后续构建
+
+      # 步骤3：进入 RuoYi-admin 目录，执行 Maven 打包（跳过测试）
+      - name: Maven 打包（跳过测试）
+        working-directory: ./RuoYi-admin  # 切换到多模块工程根目录
+        run: mvn clean package -DskipTests  # 核心命令：清理→打包→跳过测试
+
+      # （可选）步骤4：保存打包产物（如需后续部署可添加）
+      - name: 保存打包结果
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruoyi-admin-packages  # 产物压缩包名称
+          path: |
+            ./RuoYi-admin/ruoyi-admin/target/*.jar  # 子模块 ruoyi-admin 的 Jar 包路径
+            ./RuoYi-admin/**/target/*.jar  # （可选）如需所有子模块产物，保留此句
