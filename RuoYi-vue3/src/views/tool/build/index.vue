@@ -143,9 +143,9 @@ function download() {
 }
 function empty() {
   proxy.$modal.confirm('确定要清空所有组件吗？', '提示', { type: 'warning' }).then(() => {
-      idGlobal.value = 100
-      drawingList.value = []
-    }
+    idGlobal.value = 100
+    drawingList.value = []
+  }
   )
 }
 
