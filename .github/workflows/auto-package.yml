@@ -1,4 +1,4 @@
-name: Build RuoYi-admin (Multi-module)
+name: Build RuoYi-admin (Dynamic Modules)
 
 on:
   push:
@@ -16,7 +16,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Install tree (for directory inspection)
+      - name: Install tree
         run: sudo apt-get install -y tree
       
       - name: Set up JDK 21
@@ -28,53 +28,67 @@ jobs:
       
       - name: Show project structure
         working-directory: ./RuoYi-admin
-        run: |
-          echo "Project structure (RuoYi-admin root):"
-          tree -L 4  # 显示4级目录，便于查看子模块结构
+        run: tree -L 4
       
       - name: Build all modules with Maven
         working-directory: ./RuoYi-admin
-        run: |
-          # 从父模块构建所有子模块
-          mvn clean package -DskipTests
-          # 查看构建结果摘要
-          echo "Build summary:"
-          mvn help:evaluate -Dexpression=project.modules | grep -v "\[INFO\]"
+        run: mvn clean package -DskipTests
       
-      - name: Find submodule jar files
-        id: find_jars
+      - name: Find submodules and jar files
+        id: find_modules
         working-directory: ./RuoYi-admin
         run: |
-          # 查找所有子模块中的jar文件，排除测试相关和父模块（pom）
-          echo "Found jar files in submodules:"
-          find . -type f -name "*.jar" \
-            -not -path "*/target/test-classes/*" \
-            -not -path "*/target/*-tests.jar"
+          # 从父pom.xml中提取所有子模块
+          echo "Extracting modules from parent pom.xml..."
+          mvn help:evaluate -Dexpression=project.modules | grep -v "\[INFO\]" | grep -v "^$" > modules.txt
           
-          # 保存jar文件路径到环境变量
-          echo "JAR_PATHS=$(find . -type f -name "*.jar" \
-            -not -path "*/target/test-classes/*" \
-            -not -path "*/target/*-tests.jar" | tr '\n' ' ')" >> $GITHUB_ENV
+          echo "Found submodules:"
+          cat modules.txt
+          
+          # 为每个模块生成jar路径模式
+          echo "Generating jar path patterns..."
+          > jar_patterns.txt
+          while IFS= read -r module; do
+            # 每个模块的jar路径模式
+            echo "${{ github.workspace }}/RuoYi-admin/$module/target/*.jar" >> jar_patterns.txt
+            echo "${{ github.workspace }}/RuoYi-admin/$module/target/*/*.jar" >> jar_patterns.txt
+          done < modules.txt
+          
+          # 显示生成的路径模式
+          echo "Generated jar path patterns:"
+          cat jar_patterns.txt
+          
+          # 将路径模式转换为GitHub Actions的多行格式
+          patterns=$(cat jar_patterns.txt | tr '\n' '|' | sed 's/|$//')
+          echo "PATTERNS=$patterns" >> $GITHUB_ENV
+          
+          # 检查是否有模块
+          if [ -s modules.txt ]; then
+            echo "HAS_MODULES=true" >> $GITHUB_ENV
+          else
+            echo "HAS_MODULES=false" >> $GITHUB_ENV
+          fi
       
-      - name: List found jar files
-        if: env.JAR_PATHS != ''
+      - name: List all found jar files
+        if: env.HAS_MODULES == 'true'
         working-directory: ./RuoYi-admin
         run: |
-          echo "Jar files to be uploaded:"
-          echo $JAR_PATHS | tr ' ' '\n'
+          echo "All jar files found in modules:"
+          while IFS= read -r pattern; do
+            echo "Searching in: $pattern"
+            find $(dirname "$pattern") -maxdepth 1 -name "$(basename "$pattern")"
+          done < jar_patterns.txt
       
       - name: Upload build artifacts
-        if: env.JAR_PATHS != ''
+        if: env.HAS_MODULES == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ruoyi-admin-submodules-build
+          name: ruoyi-admin-modules-build
           path: |
-            ${{ env.JAR_PATHS }}
+            ${{ env.PATTERNS }}
       
-      - name: Handle missing jars
-        if: env.JAR_PATHS == ''
+      - name: Handle no modules found
+        if: env.HAS_MODULES == 'false'
         run: |
-          echo "Warning: No jar files found in submodules"
-          echo "Check Maven build logs for possible errors"
-          # 可选：如果希望构建失败，取消下面这行的注释
-          # exit 1
+          echo "Error: No submodules found in parent pom.xml"
+          exit 1
