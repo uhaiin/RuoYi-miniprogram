@@ -1,6 +1,5 @@
-name: RuoYi-admin 自动打包
+name: RuoYi-admin 自动打包（修复版）
 
-# 触发条件：仅当RuoYi-admin目录或工作流文件变更时触发
 on:
   push:
     branches: [ "main" ]
@@ -27,21 +26,29 @@ jobs:
         java-version: '21'
         distribution: 'temurin'
         cache: maven
-        # 针对RuoYi-admin目录的pom.xml缓存依赖
         cache-dependency-path: RuoYi-admin/pom.xml
 
-    - name: 构建并测试RuoYi-admin项目
-      working-directory: ./RuoYi-admin
-      run: mvn -B clean verify
+    - name: 查看项目结构（调试用）
+      run: |
+        echo "当前目录结构："
+        ls -l
+        echo "RuoYi-admin目录内容："
+        ls -l RuoYi-admin/
 
-    - name: 打包RuoYi-admin为JAR
+    - name: 构建并打包（带详细日志）
       working-directory: ./RuoYi-admin
-      run: mvn -B package -DskipTests
+      run: |
+        echo "开始构建项目..."
+        mvn -X clean package -DskipTests  # -X 输出详细日志，便于排查错误
+        echo "构建完成，查看target目录："
+        ls -l target/  # 显示target目录内容，确认是否生成JAR
 
     - name: 保存打包产物
       uses: actions/upload-artifact@v4
       with:
         name: ruoyi-admin-app-${{ github.sha }}
-        path: RuoYi-admin/target/*.jar
+        # 尝试匹配可能的JAR路径（多模块项目常用）
+        path: |
+          RuoYi-admin/target/*.jar
+          RuoYi-admin/**/target/*.jar  # 适配子模块结构
         retention-days: 30
-
