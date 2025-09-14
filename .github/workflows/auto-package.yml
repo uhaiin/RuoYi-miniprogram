@@ -1,4 +1,4 @@
-name: Build RuoYi-admin (Dynamic Modules)
+name: Build RuoYi-admin (Multi-module)
 
 on:
   push:
@@ -34,58 +34,42 @@ jobs:
         working-directory: ./RuoYi-admin
         run: mvn clean package -DskipTests
       
-      - name: Find submodules and prepare jar paths
-        id: find_modules
+      - name: Find submodule jar files
+        id: find_jars
         working-directory: ./RuoYi-admin
         run: |
-          # 从父pom.xml中提取所有子模块，只保留有效的模块名称
-          echo "Extracting modules from parent pom.xml..."
+          # 查找所有jar文件并保存到文件
+          find . -type f -name "*.jar" \
+            -not -path "*/target/test-classes/*" \
+            -not -path "*/target/*-tests.jar" > jar_paths.txt
           
-          # 使用更严格的过滤：只保留字母、数字、横线和下划线组成的模块名
-          mvn help:evaluate -Dexpression=project.modules | grep -E '^[a-zA-Z0-9_-]+$' > modules.txt
+          # 显示找到的jar文件
+          echo "Found jar files:"
+          cat jar_paths.txt
           
-          echo "Found submodules:"
-          cat modules.txt
-          
-          # 检查是否有模块
-          if [ -s modules.txt ]; then
-            echo "HAS_MODULES=true" >> $GITHUB_ENV
+          # 检查是否找到jar文件
+          if [ -s jar_paths.txt ]; then
+            echo "HAS_JARS=true" >> $GITHUB_ENV
           else
-            echo "HAS_MODULES=false" >> $GITHUB_ENV
-            exit 0
+            echo "HAS_JARS=false" >> $GITHUB_ENV
           fi
-          
-          # 为每个模块生成jar路径模式并保存到文件
-          echo "Generating jar path patterns..."
-          > jar_patterns.txt
-          while IFS= read -r module; do
-            # 每个模块的jar路径模式
-            echo "${{ github.workspace }}/RuoYi-admin/$module/target/*.jar" >> jar_patterns.txt
-            echo "${{ github.workspace }}/RuoYi-admin/$module/target/*/*.jar" >> jar_patterns.txt
-          done < modules.txt
-          
-          # 显示生成的路径模式
-          echo "Generated jar path patterns:"
-          cat jar_patterns.txt
       
-      - name: List all found jar files
-        if: env.HAS_MODULES == 'true'
-        run: |
-          echo "All jar files found in modules:"
-          while IFS= read -r pattern; do
-            echo "Searching in: $pattern"
-            find $(dirname "$pattern") -maxdepth 2 -name "$(basename "$pattern")"
-          done < ${{ github.workspace }}/RuoYi-admin/jar_patterns.txt
-      
-      - name: Upload build artifacts using file patterns
-        if: env.HAS_MODULES == 'true'
+      - name: Upload build artifacts
+        if: env.HAS_JARS == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: ruoyi-admin-modules-build
-          path-file: ${{ github.workspace }}/RuoYi-admin/jar_patterns.txt
+          name: ruoyi-admin-submodules-build
+          path: |
+            ${{ github.workspace }}/RuoYi-admin/ruoyi-generator/target/ruoyi-generator-3.9.0.jar
+            ${{ github.workspace }}/RuoYi-admin/ruoyi-quartz/target/ruoyi-quartz-3.9.0.jar
+            ${{ github.workspace }}/RuoYi-admin/ruoyi-framework/target/ruoyi-framework-3.9.0.jar
+            ${{ github.workspace }}/RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar
+            ${{ github.workspace }}/RuoYi-admin/ruoyi-common/target/ruoyi-common-3.9.0.jar
+            ${{ github.workspace }}/RuoYi-admin/ruoyi-system/target/ruoyi-system-3.9.0.jar
+            ${{ github.workspace }}/RuoYi-admin/ruoyi-wechat/target/ruoyi-wechat-3.9.0.jar
       
-      - name: Handle no modules found
-        if: env.HAS_MODULES == 'false'
+      - name: Handle missing jars
+        if: env.HAS_JARS == 'false'
         run: |
-          echo "Error: No submodules found in parent pom.xml"
+          echo "Warning: No jar files found in submodules"
           exit 1
