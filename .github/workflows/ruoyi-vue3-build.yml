@@ -1,4 +1,4 @@
-name: 构建并部署 RuoYi-vue3
+name: 打包 RuoYi-vue3 生产版本
 
 permissions:
   contents: write
