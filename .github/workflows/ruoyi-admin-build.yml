@@ -3,9 +3,9 @@ name: RuoYi-admin 代码打包流水线
 # 触发条件：监控 RuoYi-admin 目录的提交和合并请求
 on:
   push:
-    branches: [ main ]  # 替换为你的实际分支（如开发分支 dev）
+    branches: [ main ]  # 替换为你的实际分支
     paths:
-      - 'RuoYi-admin/**'  # 仅当该目录下代码变更时触发
+      - 'RuoYi-admin/**'
   pull_request:
     branches: [ main ]  # 替换为你的实际分支
     paths:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # 运行环境（Ubuntu 最新版）
+    runs-on: ubuntu-latest
     
     steps:
       # 步骤1：检出 GitHub 仓库代码
@@ -25,17 +25,56 @@ jobs:
         uses: actions/setup-java@v4
         with:
           java-version: '21'
-          distribution: 'temurin'  # 推荐使用 Adoptium Temurin JDK（稳定且常用）
-          cache: maven  # 缓存 Maven 依赖，加速后续构建
+          distribution: 'temurin'
+          cache: maven
 
-      # 步骤3：进入 RuoYi-admin 目录，执行 Maven 打包（跳过测试）
+      # 步骤3：Maven 打包（跳过测试）
       - name: Maven 打包（跳过测试）
-        working-directory: ./RuoYi-admin  # 切换到多模块工程根目录
-        run: mvn clean package -DskipTests  # 核心命令：清理→打包→跳过测试
+        working-directory: ./RuoYi-admin
+        run: mvn clean package -DskipTests
 
-      # 步骤4：保存打包产物（使用相对路径）
+      # 步骤4：保存打包产物
       - name: 保存打包结果
         uses: actions/upload-artifact@v4
         with:
-          name: ruoyi-admin-jar  # 产物压缩包名称（仅包含单个JAR文件）
-          path: ./RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar  # 相对路径，从仓库根目录开始
+          name: ruoyi-admin-jar
+          path: ./RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar
+
+      # 步骤5：准备部署目录并处理产物
+      - name: 准备部署文件
+        run: |
+          # 创建部署目录
+          mkdir -p deploy
+          
+          # 复制JAR文件到部署目录
+          cp ./RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar deploy/
+          
+          # 如果有压缩包需要解压（根据实际压缩包名称调整）
+          # 假设存在压缩包，这里演示解压逻辑
+          if [ -f "ruoyi-admin-jar.zip" ]; then
+            # 解压到部署目录
+            unzip ruoyi-admin-jar.zip -d deploy/
+            # 删除原始压缩包
+            rm -f ruoyi-admin-jar.zip
+          fi
+
+      # 步骤6：提交并推送更改到仓库
+      - name: 提交并推送更改到仓库
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 配置Git用户信息
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          
+          # 添加更改
+          git add deploy/
+          
+          # 获取当前时间（UTC时间，格式：年-月-日 时:分:秒）
+          CURRENT_TIME=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          
+          # 提交更改（仅当有变化时）
+          git commit -m "ci(package): ${CURRENT_TIME} Upload ruoyi-admin-jar to root deploy folder" || echo "没有需要提交的更改"
+          
+          # 推送更改
+          git push https://${GITHUB_ACTOR}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git HEAD:${GITHUB_REF#refs/heads/}
