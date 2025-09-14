@@ -47,4 +47,6 @@ selenium-debug.log
 *.local
 
 package-lock.json
-yarn.lock
+
+# ci 流水线依赖 yarn.lock 文件
+# yarn.lock
