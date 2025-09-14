@@ -33,11 +33,9 @@ jobs:
         working-directory: ./RuoYi-admin  # 切换到多模块工程根目录
         run: mvn clean package -DskipTests  # 核心命令：清理→打包→跳过测试
 
-      # （可选）步骤4：保存打包产物（如需后续部署可添加）
+      # 步骤4：保存打包产物（使用相对路径）
       - name: 保存打包结果
         uses: actions/upload-artifact@v4
         with:
-          name: ruoyi-admin-packages  # 产物压缩包名称
-          path: |
-            /home/runner/work/RuoYi-miniprogram/RuoYi-miniprogram/RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar
-            # ./RuoYi-admin/**/target/*.jar  # （可选）如需所有子模块产物，保留此句
+          name: ruoyi-admin-jar  # 产物压缩包名称（仅包含单个JAR文件）
+          path: ./RuoYi-admin/ruoyi-admin/target/ruoyi-admin.jar  # 相对路径，从仓库根目录开始
