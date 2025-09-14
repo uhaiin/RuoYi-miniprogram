@@ -1,5 +1,8 @@
 name: RuoYi-admin 代码打包流水线
 
+permissions:
+  contents: write  # 允许推送代码到仓库
+
 # 触发条件：监控 RuoYi-admin 目录的提交和合并请求
 on:
   push:
