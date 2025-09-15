@@ -2,5 +2,5 @@
 import http from '../utils/http'
 
 export const reqLogin = (code) => {
-  return http.get(`/api/wechat/user/login/${code}`)
+  return http.get(`/wechat/login/${code}`)
 }

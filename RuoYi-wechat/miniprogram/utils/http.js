@@ -29,7 +29,7 @@ instance.interceptors.request = (config) => {
   const token = getStorage('token')
   // 如果本地存在 token，这时候就需要在请求头中添加 token 字段
   if (token) {
-    config.header['token'] = token
+    config.header['Authorization'] = token
   }
 
   // 在发送请求之前做些什么

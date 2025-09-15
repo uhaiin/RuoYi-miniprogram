@@ -46,7 +46,9 @@ async function wxLogin() {
 async function initLogin() {
   const code = await wxLogin();
   if (code) {
+    console.log("code:" + code)
     const res = await reqLogin(code)
+    console.log(res.data)
     if (res.code == 0) {
       setStorage("token", res.data.token)
     } else {
