@@ -131,6 +131,12 @@
             <artifactId>jakarta.servlet-api</artifactId>
         </dependency>
 
+        <!--简化开发-->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
