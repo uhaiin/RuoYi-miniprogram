@@ -6,6 +6,7 @@
 
     <resultMap type="SysUser" id="SysUserResult">
         <id property="userId" column="user_id"/>
+        <result property="openid" column="openid"/>
         <result property="deptId" column="dept_id"/>
         <result property="userName" column="user_name"/>
         <result property="nickName" column="nick_name"/>
@@ -48,7 +49,7 @@
     </resultMap>
 
     <sql id="selectUserVo">
-        select u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.avatar, u.phonenumber, u.password, u.sex,
+        select u.user_id, u.openid, u.dept_id, u.user_name, u.nick_name, u.email, u.avatar, u.phonenumber, u.password, u.sex,
         u.status, u.del_flag, u.login_ip, u.login_date, u.pwd_update_date, u.create_by, u.create_time, u.remark,
         d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.status as dept_status,
         r.role_id, r.role_name, r.role_key, r.role_sort, r.data_scope, r.status as role_status
@@ -136,6 +137,11 @@
         where u.user_id = #{userId}
     </select>
 
+    <select id="selectUserByOpenId" resultType="com.ruoyi.common.core.domain.entity.SysUser">
+        <include refid="selectUserVo"/>
+        where u.openid = #{openid}
+    </select>
+
     <select id="checkUserNameUnique" parameterType="String" resultMap="SysUserResult">
         select user_id, user_name from sys_user where user_name = #{userName} and del_flag = '0' limit 1
     </select>
@@ -166,6 +172,42 @@
         create_time
         )values(
         <if test="userId != null and userId != ''">#{userId},</if>
+        <if test="deptId != null and deptId != ''">#{deptId},</if>
+        <if test="userName != null and userName != ''">#{userName},</if>
+        <if test="nickName != null and nickName != ''">#{nickName},</if>
+        <if test="email != null and email != ''">#{email},</if>
+        <if test="avatar != null and avatar != ''">#{avatar},</if>
+        <if test="phonenumber != null and phonenumber != ''">#{phonenumber},</if>
+        <if test="sex != null and sex != ''">#{sex},</if>
+        <if test="password != null and password != ''">#{password},</if>
+        <if test="status != null and status != ''">#{status},</if>
+        <if test="pwdUpdateDate != null">#{pwdUpdateDate},</if>
+        <if test="createBy != null and createBy != ''">#{createBy},</if>
+        <if test="remark != null and remark != ''">#{remark},</if>
+        sysdate()
+        )
+    </insert>
+
+    <insert id="insertWeChatUser" parameterType="SysUser" useGeneratedKeys="true" keyProperty="userId">
+        insert into sys_user(
+        <if test="userId != null and userId != 0">user_id,</if>
+        <if test="openid != null and openid != ''">openid,</if>
+        <if test="deptId != null and deptId != 0">dept_id,</if>
+        <if test="userName != null and userName != ''">user_name,</if>
+        <if test="nickName != null and nickName != ''">nick_name,</if>
+        <if test="email != null and email != ''">email,</if>
+        <if test="avatar != null and avatar != ''">avatar,</if>
+        <if test="phonenumber != null and phonenumber != ''">phonenumber,</if>
+        <if test="sex != null and sex != ''">sex,</if>
+        <if test="password != null and password != ''">password,</if>
+        <if test="status != null and status != ''">status,</if>
+        <if test="pwdUpdateDate != null">pwd_update_date,</if>
+        <if test="createBy != null and createBy != ''">create_by,</if>
+        <if test="remark != null and remark != ''">remark,</if>
+        create_time
+        )values(
+        <if test="userId != null and userId != ''">#{userId},</if>
+        <if test="openid != null and openid != ''">#{openid},</if>
         <if test="deptId != null and deptId != ''">#{deptId},</if>
         <if test="userName != null and userName != ''">#{userName},</if>
         <if test="nickName != null and nickName != ''">#{nickName},</if>

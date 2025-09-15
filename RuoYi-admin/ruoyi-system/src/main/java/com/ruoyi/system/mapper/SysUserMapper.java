@@ -52,6 +52,16 @@ public interface SysUserMapper {
      */
     public SysUser selectUserById(Long userId);
 
+
+    /**
+     * 通过openId查询用户
+     *
+     * @param openid 微信用户 openid
+     * @return 用户对象信息
+     */
+    SysUser selectUserByOpenId(String openid);
+
+
     /**
      * 新增用户信息
      *
@@ -144,4 +154,11 @@ public interface SysUserMapper {
      * @return 结果
      */
     public SysUser checkEmailUnique(String email);
+
+    /**
+     * 新增微信用户信息
+     * @param sysUser 用户信息
+     * @return 影响行数
+     */
+    int insertWeChatUser(SysUser sysUser);
 }

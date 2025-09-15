@@ -52,6 +52,14 @@ public interface ISysUserService {
     public SysUser selectUserById(Long userId);
 
     /**
+     * 通过微信openID查询用户
+     *
+     * @param openid 微信用户openID
+     * @return 用户对象信息
+     */
+    SysUser selectUserByOpenId(String openid);
+
+    /**
      * 根据用户ID查询用户所属角色组
      *
      * @param userName 用户名
@@ -214,4 +222,12 @@ public interface ISysUserService {
      * @return 结果
      */
     public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName);
+
+    /**
+     * 通过微信openID注册用户
+     *
+     * @param openid 微信用户openID
+     * @return 用户对象信息
+     */
+    SysUser registerWeChatUser(String openid);
 }

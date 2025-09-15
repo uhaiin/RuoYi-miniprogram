@@ -121,6 +121,17 @@ public class SysUserServiceImpl implements ISysUserService {
     }
 
     /**
+     * 通过微信用户openID查询用户
+     *
+     * @param openid 微信用户openID
+     * @return 用户对象信息
+     */
+    @Override
+    public SysUser selectUserByOpenId(String openid) {
+        return userMapper.selectUserByOpenId(openid);
+    }
+
+    /**
      * 查询用户所属角色组
      *
      * @param userName 用户名
@@ -503,5 +514,16 @@ public class SysUserServiceImpl implements ISysUserService {
             successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
         }
         return successMsg.toString();
+    }
+
+    @Override
+    public SysUser registerWeChatUser(String openid) {
+        SysUser sysUser = new SysUser();
+        sysUser.setOpenid(openid);
+        sysUser.setUserName(openid);
+        sysUser.setNickName(openid);
+        sysUser.setUserId(3L);
+        userMapper.insertWeChatUser(sysUser);
+        return sysUser;
     }
 }
