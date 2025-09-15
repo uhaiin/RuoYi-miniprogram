@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: prod
+    active: dev
     include:
       - pub
       - druid
@@ -9,3 +9,4 @@ spring:
       - ruoyi
       - security
       - swagger
+      - wechat
