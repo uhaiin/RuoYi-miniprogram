@@ -9,6 +9,8 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.bean.BeanValidators;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.common.utils.uuid.SnowflakeUtil;
+import com.ruoyi.common.utils.uuid.UUID;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
 import com.ruoyi.system.domain.SysUserRole;
@@ -520,10 +522,19 @@ public class SysUserServiceImpl implements ISysUserService {
     public SysUser registerWeChatUser(String openid) {
         SysUser sysUser = new SysUser();
         sysUser.setOpenid(openid);
-        sysUser.setUserName(openid);
-        sysUser.setNickName(openid);
-        sysUser.setUserId(3L);
-        userMapper.insertWeChatUser(sysUser);
+        String name = UUID.fastUUID().toString().substring(0, 8);
+        sysUser.setUserName(name);
+        sysUser.setNickName(name);
+        sysUser.setCreateBy("sys");
+        sysUser.setCreateTime(new Date());
+        sysUser.setUpdateTime(new Date());
+        sysUser.setRemark("微信小程序用户");
+        long uid = SnowflakeUtil.nextId();
+        sysUser.setUserId(uid);
+        int i = userMapper.insertWeChatUser(sysUser);
+        if (i > 0) {
+            log.info("成功创建微信小程序用户 ==> {}", uid);
+        }
         return sysUser;
     }
 }
