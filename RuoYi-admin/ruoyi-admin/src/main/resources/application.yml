@@ -8,5 +8,6 @@ spring:
       - redis
       - ruoyi
       - security
+      - jasypt
       - swagger
       - wechat
