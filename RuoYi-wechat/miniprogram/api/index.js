@@ -3,7 +3,7 @@ import http from '../utils/http'
 
 export const reqIndexData = () => {
   return http.all(
-    http.get('/api/wechat/user/login/1')
+    http.get('/wechat/test')
   )
 }
 

@@ -18,8 +18,8 @@ Page({
   },
   // 获取首页数据
   async getIndexData() {
-    // const res = await reqIndexData()
-    // console.log(res)
+    const res = await reqIndexData()
+    console.log(res)
     // setStorage('token', data.token);
   },
 })
