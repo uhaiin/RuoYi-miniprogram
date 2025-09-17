@@ -1,4 +1,4 @@
-package com.ruoyi.web.core.config;
+package com.ruoyi.web.core.aop;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
