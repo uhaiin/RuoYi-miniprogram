@@ -8,29 +8,29 @@ package com.ruoyi.common.enums;
  */
 public enum ApiResponseEnum {
 
-	/**
-	 * 成功
-	 */
-	SUCCESS(0, "success"),
+    /**
+     * 成功
+     */
+    SUCCESS(0, "success"),
 
-	/**
-	 * 失败
-	 */
-	FAILURE(-1, "failure");
+    /**
+     * 失败
+     */
+    FAILURE(-1, "failure");
 
-	/**
-	 * 请求结果代码，0 代表成功，-1 代表失败
-	 */
-	public final Integer code;
+    /**
+     * 请求结果代码，0 代表成功，-1 代表失败
+     */
+    public final Integer code;
 
-	/**
-	 * 请求结果消息
-	 */
-	public final String message;
+    /**
+     * 请求结果消息
+     */
+    public final String message;
 
-	ApiResponseEnum(Integer code, String message) {
-		this.code = code;
-		this.message = message;
-	}
+    ApiResponseEnum(Integer code, String message) {
+        this.code = code;
+        this.message = message;
+    }
 
 }

@@ -3,7 +3,11 @@ package com.ruoyi.common.annotation;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.enums.LimitType;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * 限流注解

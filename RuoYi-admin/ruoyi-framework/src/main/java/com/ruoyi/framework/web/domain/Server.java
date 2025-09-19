@@ -2,7 +2,11 @@ package com.ruoyi.framework.web.domain;
 
 import com.ruoyi.common.utils.Arith;
 import com.ruoyi.common.utils.ip.IpUtils;
-import com.ruoyi.framework.web.domain.server.*;
+import com.ruoyi.framework.web.domain.server.Cpu;
+import com.ruoyi.framework.web.domain.server.Jvm;
+import com.ruoyi.framework.web.domain.server.Mem;
+import com.ruoyi.framework.web.domain.server.Sys;
+import com.ruoyi.framework.web.domain.server.SysFile;
 import oshi.SystemInfo;
 import oshi.hardware.CentralProcessor;
 import oshi.hardware.CentralProcessor.TickType;

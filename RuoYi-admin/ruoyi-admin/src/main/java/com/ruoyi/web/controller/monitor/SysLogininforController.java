@@ -12,7 +12,12 @@ import com.ruoyi.system.service.ISysLogininforService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -24,11 +29,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/monitor/logininfor")
 public class SysLogininforController extends BaseController {
-    @Autowired
-    private ISysLogininforService logininforService;
+    private final ISysLogininforService logininforService;
+
+    private final SysPasswordService passwordService;
 
     @Autowired
-    private SysPasswordService passwordService;
+    public SysLogininforController(ISysLogininforService logininforService, SysPasswordService passwordService) {
+        this.logininforService = logininforService;
+        this.passwordService = passwordService;
+    }
 
     @PreAuthorize("@ss.hasPermi('monitor:logininfor:list')")
     @GetMapping("/list")
@@ -43,7 +52,7 @@ public class SysLogininforController extends BaseController {
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysLogininfor logininfor) {
         List<SysLogininfor> list = logininforService.selectLogininforList(logininfor);
-        ExcelUtil<SysLogininfor> util = new ExcelUtil<SysLogininfor>(SysLogininfor.class);
+        ExcelUtil<SysLogininfor> util = new ExcelUtil<>(SysLogininfor.class);
         util.exportExcel(response, list, "登录日志");
     }
 
