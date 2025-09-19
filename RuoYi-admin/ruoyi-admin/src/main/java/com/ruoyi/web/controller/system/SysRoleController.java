@@ -21,7 +21,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -33,20 +40,24 @@ import java.util.List;
 @RestController
 @RequestMapping("/system/role")
 public class SysRoleController extends BaseController {
-    @Autowired
-    private ISysRoleService roleService;
+    private final ISysRoleService roleService;
+
+    private final TokenService tokenService;
+
+    private final SysPermissionService permissionService;
+
+    private final ISysUserService userService;
+
+    private final ISysDeptService deptService;
 
     @Autowired
-    private TokenService tokenService;
-
-    @Autowired
-    private SysPermissionService permissionService;
-
-    @Autowired
-    private ISysUserService userService;
-
-    @Autowired
-    private ISysDeptService deptService;
+    public SysRoleController(ISysRoleService roleService, TokenService tokenService, SysPermissionService permissionService, ISysUserService userService, ISysDeptService deptService) {
+        this.roleService = roleService;
+        this.tokenService = tokenService;
+        this.permissionService = permissionService;
+        this.userService = userService;
+        this.deptService = deptService;
+    }
 
     @PreAuthorize("@ss.hasPermi('system:role:list')")
     @GetMapping("/list")
@@ -61,7 +72,7 @@ public class SysRoleController extends BaseController {
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysRole role) {
         List<SysRole> list = roleService.selectRoleList(role);
-        ExcelUtil<SysRole> util = new ExcelUtil<SysRole>(SysRole.class);
+        ExcelUtil<SysRole> util = new ExcelUtil<>(SysRole.class);
         util.exportExcel(response, list, "角色数据");
     }
 

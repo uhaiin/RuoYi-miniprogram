@@ -18,11 +18,15 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class SysRegisterController extends BaseController {
-    @Autowired
-    private SysRegisterService registerService;
+    private final SysRegisterService registerService;
+
+    private final ISysConfigService configService;
 
     @Autowired
-    private ISysConfigService configService;
+    public SysRegisterController(SysRegisterService registerService, ISysConfigService configService) {
+        this.registerService = registerService;
+        this.configService = configService;
+    }
 
     @PostMapping("/register")
     public AjaxResult register(@RequestBody RegisterBody user) {

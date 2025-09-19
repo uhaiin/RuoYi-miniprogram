@@ -32,20 +32,24 @@ import java.util.Set;
  */
 @RestController
 public class SysLoginController {
-    @Autowired
-    private SysLoginService loginService;
+    private final SysLoginService loginService;
+
+    private final ISysMenuService menuService;
+
+    private final SysPermissionService permissionService;
+
+    private final TokenService tokenService;
+
+    private final ISysConfigService configService;
 
     @Autowired
-    private ISysMenuService menuService;
-
-    @Autowired
-    private SysPermissionService permissionService;
-
-    @Autowired
-    private TokenService tokenService;
-
-    @Autowired
-    private ISysConfigService configService;
+    public SysLoginController(SysLoginService loginService, ISysMenuService menuService, SysPermissionService permissionService, TokenService tokenService, ISysConfigService configService) {
+        this.loginService = loginService;
+        this.menuService = menuService;
+        this.permissionService = permissionService;
+        this.tokenService = tokenService;
+        this.configService = configService;
+    }
 
     /**
      * 登录方法

@@ -23,8 +23,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/system/menu")
 public class SysMenuController extends BaseController {
+
+    private final ISysMenuService menuService;
+
     @Autowired
-    private ISysMenuService menuService;
+    public SysMenuController(ISysMenuService menuService) {
+        this.menuService = menuService;
+    }
 
     /**
      * 获取菜单列表
