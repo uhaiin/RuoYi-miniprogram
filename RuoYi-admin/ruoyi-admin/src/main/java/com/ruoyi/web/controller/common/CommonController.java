@@ -41,19 +41,26 @@ public class CommonController {
      *
      * @param fileName 文件名称
      * @param delete   是否删除
+     * @param response HTTP响应对象
+     * @param request  HTTP请求对象
      */
     @GetMapping("/download")
     public void fileDownload(String fileName, Boolean delete, HttpServletResponse response, HttpServletRequest request) {
         try {
+            // 验证文件名是否合法
             if (!FileUtils.checkAllowDownload(fileName)) {
                 throw new Exception(StringUtils.format("文件名称({})非法，不允许下载。 ", fileName));
             }
+            // 构造实际文件名和文件路径
             String realFileName = System.currentTimeMillis() + fileName.substring(fileName.indexOf("_") + 1);
             String filePath = RuoYiConfig.getDownloadPath() + fileName;
 
+            // 设置响应头信息
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);
             FileUtils.setAttachmentResponseHeader(response, realFileName);
+            // 写入文件内容到响应输出流
             FileUtils.writeBytes(filePath, response.getOutputStream());
+            // 根据参数决定是否删除文件
             if (Boolean.TRUE.equals(delete)) {
                 FileUtils.deleteFile(filePath);
             }
@@ -62,11 +69,15 @@ public class CommonController {
         }
     }
 
+
     /**
      * 通用上传请求（单个）
+     *
+     * @param file 要上传的文件
+     * @return AjaxResult 包含上传结果信息的对象，成功时包含文件URL、文件名等信息，失败时包含错误信息
      */
     @PostMapping("/upload")
-    public AjaxResult uploadFile(MultipartFile file) throws Exception {
+    public AjaxResult uploadFile(MultipartFile file) {
         try {
             // 上传文件路径
             String filePath = RuoYiConfig.getUploadPath();
@@ -84,8 +95,12 @@ public class CommonController {
         }
     }
 
+
     /**
      * 通用上传请求（多个）
+     *
+     * @param files 要上传的文件列表
+     * @return AjaxResult 包含上传结果信息的对象，成功时包含文件URL、文件名等信息，失败时包含错误信息
      */
     @PostMapping("/uploads")
     public AjaxResult uploadFiles(List<MultipartFile> files) {
@@ -96,6 +111,8 @@ public class CommonController {
             List<String> fileNames = new ArrayList<>();
             List<String> newFileNames = new ArrayList<>();
             List<String> originalFilenames = new ArrayList<>();
+
+            // 遍历所有上传文件，逐个处理并保存文件信息
             for (MultipartFile file : files) {
                 // 上传并返回新文件名称
                 String fileName = FileUploadUtils.upload(filePath, file);
@@ -105,6 +122,8 @@ public class CommonController {
                 newFileNames.add(FileUtils.getName(fileName));
                 originalFilenames.add(file.getOriginalFilename());
             }
+
+            // 构造成功响应结果，将文件信息按分隔符连接后返回
             AjaxResult ajax = AjaxResult.success();
             ajax.put("urls", StringUtils.join(urls, FILE_DELIMETER));
             ajax.put("fileNames", StringUtils.join(fileNames, FILE_DELIMETER));
@@ -116,12 +135,18 @@ public class CommonController {
         }
     }
 
+
     /**
      * 本地资源通用下载
+     *
+     * @param resource 要下载的资源路径
+     * @param request HTTP请求对象
+     * @param response HTTP响应对象
      */
     @GetMapping("/download/resource")
     public void resourceDownload(String resource, HttpServletRequest request, HttpServletResponse response) {
         try {
+            // 检查资源文件是否允许下载
             if (!FileUtils.checkAllowDownload(resource)) {
                 throw new Exception(StringUtils.format("资源文件({})非法，不允许下载。 ", resource));
             }
@@ -138,4 +163,5 @@ public class CommonController {
             log.error("下载文件失败", e);
         }
     }
+
 }
