@@ -36,10 +36,15 @@ public class SysRegisterService {
     private RedisCache redisCache;
 
     /**
-     * 注册
+     * 用户注册功能
+     *
+     * @param registerBody 注册请求体，包含用户名、密码、验证码等信息
+     * @return 注册结果消息，成功时返回空字符串，失败时返回错误信息
      */
     public String register(RegisterBody registerBody) {
-        String msg = "", username = registerBody.getUsername(), password = registerBody.getPassword();
+        String msg = "";
+        String username = registerBody.getUsername();
+        String password = registerBody.getPassword();
         SysUser sysUser = new SysUser();
         sysUser.setUserName(username);
 
@@ -49,6 +54,7 @@ public class SysRegisterService {
             validateCaptcha(username, registerBody.getCode(), registerBody.getUuid());
         }
 
+        // 参数校验和用户信息验证
         if (StringUtils.isEmpty(username)) {
             msg = "用户名不能为空";
         } else if (StringUtils.isEmpty(password)) {
@@ -62,6 +68,7 @@ public class SysRegisterService {
         } else if (!userService.checkUserNameUnique(sysUser)) {
             msg = "保存用户'" + username + "'失败，注册账号已存在";
         } else {
+            // 设置用户信息并执行注册
             sysUser.setNickName(username);
             sysUser.setPwdUpdateDate(DateUtils.getNowDate());
             sysUser.setPassword(SecurityUtils.encryptPassword(password));
@@ -69,11 +76,13 @@ public class SysRegisterService {
             if (!regFlag) {
                 msg = "注册失败,请联系系统管理人员";
             } else {
+                // 异步记录注册成功日志
                 AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.REGISTER, MessageUtils.message("user.register.success")));
             }
         }
         return msg;
     }
+
 
     /**
      * 校验验证码

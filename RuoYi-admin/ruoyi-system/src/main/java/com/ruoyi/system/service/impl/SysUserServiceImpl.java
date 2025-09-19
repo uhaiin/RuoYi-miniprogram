@@ -9,7 +9,6 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.bean.BeanValidators;
 import com.ruoyi.common.utils.spring.SpringUtils;
-import com.ruoyi.common.utils.uuid.SnowflakeUtil;
 import com.ruoyi.common.utils.uuid.UUID;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
@@ -187,13 +186,12 @@ public class SysUserServiceImpl implements ISysUserService {
      * 校验手机号码是否唯一
      *
      * @param user 用户信息
-     * @return
      */
     @Override
     public boolean checkPhoneUnique(SysUser user) {
-        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
+        long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
         SysUser info = userMapper.checkPhoneUnique(user.getPhonenumber());
-        if (StringUtils.isNotNull(info) && info.getUserId().longValue() != userId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getUserId() != userId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -535,17 +533,15 @@ public class SysUserServiceImpl implements ISysUserService {
         String name = UUID.fastUUID().toString().substring(0, 8);
         sysUser.setUserName(name);
         sysUser.setNickName(name);
+        sysUser.setDeptId(4L);
         sysUser.setCreateBy("sys");
         sysUser.setCreateTime(new Date());
         sysUser.setUpdateTime(new Date());
         sysUser.setRemark("微信小程序用户");
 
-        // 生成用户ID并插入数据库
-        long uid = SnowflakeUtil.nextId();
-        sysUser.setUserId(uid);
         int i = userMapper.insertWeChatUser(sysUser);
         if (i > 0) {
-            log.info("成功创建微信小程序用户 ==> {}", uid);
+            log.info("成功创建微信小程序用户 ==> {}", openid);
         }
         return sysUser;
     }
