@@ -13,10 +13,10 @@ import eu.bitwalker.useragentutils.UserAgent;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -51,31 +51,33 @@ public class TokenService {
 
     private static final Long MILLIS_MINUTE_TWENTY = 20 * 60 * 1000L;
 
-    @Autowired
+    @Resource
     private RedisCache redisCache;
 
     /**
      * 获取用户身份信息
      *
-     * @return 用户信息
+     * @param request HTTP请求对象
+     * @return 用户信息，如果获取失败则返回null
      */
     public LoginUser getLoginUser(HttpServletRequest request) {
         // 获取请求携带的令牌
         String token = getToken(request);
         if (StringUtils.isNotEmpty(token)) {
             try {
+                // 解析JWT令牌获取用户信息
                 Claims claims = parseToken(token);
                 // 解析对应的权限以及用户信息
                 String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
                 String userKey = getTokenKey(uuid);
-                LoginUser user = redisCache.getCacheObject(userKey);
-                return user;
+                return redisCache.getCacheObject(userKey);
             } catch (Exception e) {
                 log.error("获取用户信息异常'{}'", e.getMessage());
             }
         }
         return null;
     }
+
 
     /**
      * 设置用户身份信息
@@ -118,9 +120,9 @@ public class TokenService {
      * 验证令牌有效期，相差不足20分钟，自动刷新缓存
      *
      * @param loginUser 登录信息
-     * @return 令牌
      */
     public void verifyToken(LoginUser loginUser) {
+        // 获取令牌过期时间和当前时间，判断是否需要刷新令牌
         long expireTime = loginUser.getExpireTime();
         long currentTime = System.currentTimeMillis();
         if (expireTime - currentTime <= MILLIS_MINUTE_TWENTY) {
@@ -128,12 +130,14 @@ public class TokenService {
         }
     }
 
+
     /**
      * 刷新令牌有效期
      *
-     * @param loginUser 登录信息
+     * @param loginUser 登录用户信息对象，包含用户的登录状态和令牌信息
      */
     public void refreshToken(LoginUser loginUser) {
+        // 更新登录时间和过期时间
         loginUser.setLoginTime(System.currentTimeMillis());
         loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
         // 根据uuid将loginUser缓存
@@ -141,19 +145,24 @@ public class TokenService {
         redisCache.setCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES);
     }
 
+
     /**
      * 设置用户代理信息
      *
      * @param loginUser 登录信息
      */
     public void setUserAgent(LoginUser loginUser) {
+        // 解析用户代理字符串，获取浏览器和操作系统信息
         UserAgent userAgent = UserAgent.parseUserAgentString(ServletUtils.getRequest().getHeader("User-Agent"));
+        // 获取客户端IP地址
         String ip = IpUtils.getIpAddr();
         loginUser.setIpaddr(ip);
+        // 根据IP地址获取登录地理位置
         loginUser.setLoginLocation(AddressUtils.getRealAddressByIP(ip));
         loginUser.setBrowser(userAgent.getBrowser().getName());
         loginUser.setOs(userAgent.getOperatingSystem().getName());
     }
+
 
     /**
      * 从数据声明生成令牌
@@ -162,11 +171,12 @@ public class TokenService {
      * @return 令牌
      */
     private String createToken(Map<String, Object> claims) {
-        String token = Jwts.builder()
+        // 使用JWT构建器创建令牌，设置声明信息并使用HS512算法和密钥进行签名
+        return Jwts.builder()
                 .setClaims(claims)
                 .signWith(SignatureAlgorithm.HS512, secret).compact();
-        return token;
     }
+
 
     /**
      * 从令牌中获取数据声明
@@ -188,25 +198,40 @@ public class TokenService {
      * @return 用户名
      */
     public String getUsernameFromToken(String token) {
+        // 解析令牌获取声明信息
         Claims claims = parseToken(token);
+        // 从声明中提取用户名（主题）
         return claims.getSubject();
     }
+
 
     /**
      * 获取请求token
      *
-     * @param request
-     * @return token
+     * @param request HTTP请求对象
+     * @return token字符串，如果请求头中没有token或token格式不正确则返回null或空字符串
      */
     private String getToken(HttpServletRequest request) {
+        // 从请求头中获取token
         String token = request.getHeader(header);
+
+        // 如果token不为空且以指定前缀开头，则去除前缀
         if (StringUtils.isNotEmpty(token) && token.startsWith(Constants.TOKEN_PREFIX)) {
             token = token.replace(Constants.TOKEN_PREFIX, "");
         }
+
         return token;
     }
 
+
+    /**
+     * 获取登录令牌的缓存键值
+     *
+     * @param uuid 用户唯一标识符
+     * @return 完整的令牌缓存键值，格式为缓存前缀加上uuid
+     */
     private String getTokenKey(String uuid) {
         return CacheConstants.LOGIN_TOKEN_KEY + uuid;
     }
+
 }
