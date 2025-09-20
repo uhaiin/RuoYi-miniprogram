@@ -528,22 +528,29 @@ public class SysUserServiceImpl implements ISysUserService {
     @Override
     public SysUser registerWeChatUser(String openid) {
         // 创建系统用户对象并设置基本信息
-        SysUser sysUser = new SysUser();
-        sysUser.setOpenid(openid);
+        SysUser wechatUser = new SysUser();
+        wechatUser.setOpenid(openid);
         String name = UUID.fastUUID().toString().substring(0, 8);
-        sysUser.setUserName(name);
-        sysUser.setNickName(name);
-        sysUser.setDeptId(4L);
-        sysUser.setCreateBy("sys");
-        sysUser.setCreateTime(new Date());
-        sysUser.setUpdateTime(new Date());
-        sysUser.setRemark("微信小程序用户");
+        wechatUser.setUserName(name);
+        wechatUser.setNickName(name);
+        wechatUser.setDeptId(4L);
+        wechatUser.setCreateBy("sys");
+        wechatUser.setCreateTime(new Date());
+        wechatUser.setUpdateTime(new Date());
+        wechatUser.setRemark("微信小程序用户");
 
-        int i = userMapper.insertWeChatUser(sysUser);
+        int i = userMapper.insertWeChatUser(wechatUser);
         if (i > 0) {
+            wechatUser.setPostIds(new Long[]{3L});
+            wechatUser.setRoleIds(new Long[]{3L});
+
+            // 新增用户岗位关联
+            insertUserPost(wechatUser);
+            // 新增用户与角色管理
+            insertUserRole(wechatUser);
             log.info("成功创建微信小程序用户 ==> {}", openid);
         }
-        return sysUser;
+        return wechatUser;
     }
 
 }
