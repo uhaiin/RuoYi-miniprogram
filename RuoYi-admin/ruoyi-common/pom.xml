@@ -143,6 +143,12 @@
             <artifactId>jasypt-spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- spring-doc -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
