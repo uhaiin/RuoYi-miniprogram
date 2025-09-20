@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@vant/weapp": "^1.11.1",
+    "@vant/weapp": "^1.11.7",
     "async-validator": "^4.2.5",
     "mina-request": "^1.0.8",
     "miniprogram-computed": "^4.4.0",

@@ -1,1 +1,45 @@
-<view>hello world</view>
+<!-- 首页轮播图 -->
+<view class="swiper">
+  <swiper autoplay interval="2000" indicator-dots indicator-color="#ffffff" indicator-active-color="#FF734C" circular>
+    <swiper-item>
+      <image src="/assets/swiper/1.jpeg"></image>
+    </swiper-item>
+    <swiper-item>
+      <image src="/assets/swiper/2.jpeg"></image>
+    </swiper-item>
+    <swiper-item>
+      <image src="/assets/swiper/3.jpeg"></image>
+    </swiper-item>
+  </swiper>
+</view>
+
+<!-- 通知栏 -->
+<van-notice-bar left-icon="volume-o" text="在代码阅读过程中人们说脏话的频率是衡量代码质量的唯一标准。" background="#ffffff" color="#FF734C"
+  mode="closeable" />
+
+<!-- 面试题分类 -->
+<scroll-view scroll-x class="scroll-x">
+  <!-- 增加空数据判断 -->
+  <view wx:if="{{categories.length === 0}}" class="empty-tip">暂无分类数据</view>
+  <!-- 使用预先处理好的categories数组 -->
+  <view wx:for="{{categories}}" wx:key="*this" class="category-item {{currentCategory === item ? 'active' : ''}}"
+    bindtap="switchCategory" data-category="{{item}}">
+    {{item}}
+  </view>
+</scroll-view>
+
+<!-- 文章列表 -->
+<view class="article-list">
+  <view wx:for="{{articles[currentCategory]}}" wx:key="id" class="container">
+    <view class="top-row">
+      <!-- 动态绑定标签类型 -->
+      <van-tag mark type="{{item.tagType}}" class="tag">
+        {{item.tag}}
+      </van-tag>
+      <view class="title">{{item.title}}</view>
+    </view>
+    <view class="stats">
+      点赞 {{item.likes}} ｜ 浏览 {{item.views}} ｜ 收藏 {{item.collections}}
+    </view>
+  </view>
+</view>
