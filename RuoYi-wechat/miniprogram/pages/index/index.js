@@ -78,6 +78,69 @@ Page({
           "likes": 38,
           "views": 980,
           "collections": 88
+        },
+        {
+          "id": 1,
+          "tag": "简单",
+          "tagType": "primary",
+          "title": "Java 面向对象特性详解",
+          "likes": 45,
+          "views": 1203,
+          "collections": 98
+        },
+        {
+          "id": 2,
+          "tag": "中等",
+          "tagType": "warning",
+          "title": "Java 集合框架完全指南",
+          "likes": 32,
+          "views": 876,
+          "collections": 76
+        },
+        {
+          "id": 3,
+          "tag": "困难",
+          "tagType": "danger",
+          "title": "Java 并发编程深入理解",
+          "likes": 58,
+          "views": 942,
+          "collections": 103
+        },
+        {
+          "id": 4,
+          "tag": "入门",
+          "tagType": "primary",
+          "title": "Java基础语法快速入门",
+          "likes": 30,
+          "views": 650,
+          "collections": 50
+        },
+        {
+          "id": 5,
+          "tag": "进阶",
+          "tagType": "warning",
+          "title": "Java高级特性应用实践",
+          "likes": 40,
+          "views": 1000,
+          "collections": 80
+        },
+        {
+          "id": 6,
+          "tag": "框架应用",
+          "tagType": "success",
+          "title": "Spring框架在Java中的使用",
+          "likes": 48,
+          "views": 1100,
+          "collections": 95
+        },
+        {
+          "id": 7,
+          "tag": "性能优化",
+          "tagType": "warning",
+          "title": "Java程序性能调优技巧",
+          "likes": 38,
+          "views": 980,
+          "collections": 88
         }
       ],
       "mysql": [{
@@ -443,7 +506,8 @@ Page({
   },
 
   switchCategory(e) {
-    const category = e.currentTarget.dataset.category;
+    console.log(e);
+    const category = e.detail.title;
     console.log("更改分类为 ==> ", category);
     this.setData({
       currentCategory: category

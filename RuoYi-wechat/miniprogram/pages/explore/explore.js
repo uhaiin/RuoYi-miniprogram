@@ -1,4 +1,4 @@
-// pages/explore/explore.js
+// pages/bot/bot.js
 Page({
 
   /**

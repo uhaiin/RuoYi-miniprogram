@@ -1,6 +1,7 @@
 {
   "usingComponents": {
-    "van-notice-bar": "@vant/weapp/notice-bar/index",
+    "van-tab": "@vant/weapp/tab/index",
+    "van-tabs": "@vant/weapp/tabs/index",
     "van-tag": "@vant/weapp/tag/index"
   },
   "componentFramework": "glass-easel"

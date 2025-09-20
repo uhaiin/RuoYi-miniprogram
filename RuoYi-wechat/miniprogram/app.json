@@ -18,7 +18,7 @@
     "borderStyle": "black",
     "list": [{
         "pagePath": "pages/index/index",
-        "text": "首页",
+        "text": "刷题",
         "iconPath": "assets/tabbar/index.png",
         "selectedIconPath": "assets/tabbar/index-active.png"
       },
