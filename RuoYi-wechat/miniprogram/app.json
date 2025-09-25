@@ -1,12 +1,14 @@
 {
   "pages": [
     "pages/index/index",
+    "pages/explore/explore",
+    "pages/bot/bot",
     "pages/mine/mine"
   ],
   "window": {
     "backgroundTextStyle": "light",
     "navigationBarBackgroundColor": "#f3514f",
-    "navigationBarTitleText": "鹿蕊内部平台",
+    "navigationBarTitleText": "1024 面试题",
     "navigationBarTextStyle": "white"
   },
   "tabBar": {
@@ -14,23 +16,33 @@
     "selectedColor": "#FF734C",
     "backgroundColor": "#ffffff",
     "borderStyle": "black",
-    "list": [
-      {
+    "list": [{
         "pagePath": "pages/index/index",
-        "text": "取码",
+        "text": "刷题",
         "iconPath": "assets/tabbar/index.png",
         "selectedIconPath": "assets/tabbar/index-active.png"
       },
       {
+        "pagePath": "pages/explore/explore",
+        "text": "发现",
+        "iconPath": "assets/tabbar/explore.png",
+        "selectedIconPath": "assets/tabbar/explore-active.png"
+      },
+      {
+        "pagePath": "pages/bot/bot",
+        "text": "AI",
+        "iconPath": "assets/tabbar/bot.png",
+        "selectedIconPath": "assets/tabbar/bot-active.png"
+      },
+      {
         "pagePath": "pages/mine/mine",
         "text": "我的",
-        "iconPath": "assets/tabbar/my.png",
-        "selectedIconPath": "assets/tabbar/my-active.png"
+        "iconPath": "assets/tabbar/mine.png",
+        "selectedIconPath": "assets/tabbar/mine-active.png"
       }
     ]
   },
-  "usingComponents": {
-  },
+  "usingComponents": {},
   "sitemapLocation": "sitemap.json",
   "preloadRule": {
     "pages/mine/mine": {
@@ -40,8 +52,7 @@
       ]
     }
   },
-  "requiredPrivateInfos": [
-  ],
+  "requiredPrivateInfos": [],
   "permission": {},
   "resolveAlias": {
     "@/*": "/*"

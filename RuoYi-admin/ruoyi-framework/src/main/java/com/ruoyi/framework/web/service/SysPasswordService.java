@@ -7,7 +7,7 @@ import com.ruoyi.common.exception.user.UserPasswordNotMatchException;
 import com.ruoyi.common.exception.user.UserPasswordRetryLimitExceedException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.framework.security.context.AuthenticationContextHolder;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 public class SysPasswordService {
-    @Autowired
+    @Resource
     private RedisCache redisCache;
 
     @Value(value = "${user.password.maxRetryCount}")
@@ -51,7 +51,7 @@ public class SysPasswordService {
             retryCount = 0;
         }
 
-        if (retryCount >= Integer.valueOf(maxRetryCount).intValue()) {
+        if (retryCount >= maxRetryCount) {
             throw new UserPasswordRetryLimitExceedException(maxRetryCount, lockTime);
         }
 
@@ -69,7 +69,7 @@ public class SysPasswordService {
     }
 
     public void clearLoginRecordCache(String loginName) {
-        if (redisCache.hasKey(getCacheKey(loginName))) {
+        if (Boolean.TRUE.equals(redisCache.hasKey(getCacheKey(loginName)))) {
             redisCache.deleteObject(getCacheKey(loginName));
         }
     }

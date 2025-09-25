@@ -3,7 +3,7 @@ package com.ruoyi.system.service.impl;
 import com.ruoyi.system.domain.SysLogininfor;
 import com.ruoyi.system.mapper.SysLogininforMapper;
 import com.ruoyi.system.service.ISysLogininforService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +16,7 @@ import java.util.List;
 @Service
 public class SysLogininforServiceImpl implements ISysLogininforService {
 
-    @Autowired
+    @Resource
     private SysLogininforMapper logininforMapper;
 
     /**

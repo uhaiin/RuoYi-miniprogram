@@ -32,23 +32,37 @@ import java.util.List;
  */
 @Configuration
 public class MyBatisConfig {
-    @Autowired
     private Environment env;
 
     static final String DEFAULT_RESOURCE_PATTERN = "**/*.class";
 
+    @Autowired
+    public MyBatisConfig(Environment env) {
+        this.env = env;
+    }
+
+    /**
+     * 设置MyBatis类型别名包路径，扫描指定包下的所有类并获取其包名
+     *
+     * @param typeAliasesPackage 类型别名包路径，支持多个路径用逗号分隔
+     * @return 处理后的类型别名包路径字符串，包含所有扫描到的包路径，用逗号分隔
+     * @throws RuntimeException 当未找到任何包时抛出运行时异常
+     */
     public static String setTypeAliasesPackage(String typeAliasesPackage) {
-        ResourcePatternResolver resolver = (ResourcePatternResolver) new PathMatchingResourcePatternResolver();
+        ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
         MetadataReaderFactory metadataReaderFactory = new CachingMetadataReaderFactory(resolver);
-        List<String> allResult = new ArrayList<String>();
+        List<String> allResult = new ArrayList<>();
         try {
+            // 遍历所有配置的包路径
             for (String aliasesPackage : typeAliasesPackage.split(",")) {
-                List<String> result = new ArrayList<String>();
+                List<String> result = new ArrayList<>();
+                // 构造资源路径模式
                 aliasesPackage = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX
                         + ClassUtils.convertClassNameToResourcePath(aliasesPackage.trim()) + "/" + DEFAULT_RESOURCE_PATTERN;
                 Resource[] resources = resolver.getResources(aliasesPackage);
-                if (resources != null && resources.length > 0) {
+                if (resources.length > 0) {
                     MetadataReader metadataReader = null;
+                    // 遍历所有资源文件，提取包名信息
                     for (Resource resource : resources) {
                         if (resource.isReadable()) {
                             metadataReader = metadataReaderFactory.getMetadataReader(resource);
@@ -60,13 +74,15 @@ public class MyBatisConfig {
                         }
                     }
                 }
-                if (result.size() > 0) {
-                    HashSet<String> hashResult = new HashSet<String>(result);
+                // 去重并添加到总结果中
+                if (!result.isEmpty()) {
+                    HashSet<String> hashResult = new HashSet<>(result);
                     allResult.addAll(hashResult);
                 }
             }
-            if (allResult.size() > 0) {
-                typeAliasesPackage = String.join(",", (String[]) allResult.toArray(new String[0]));
+            // 合并所有包路径为一个字符串
+            if (!allResult.isEmpty()) {
+                typeAliasesPackage = String.join(",", allResult.toArray(new String[0]));
             } else {
                 throw new RuntimeException("mybatis typeAliasesPackage 路径扫描错误,参数typeAliasesPackage:" + typeAliasesPackage + "未找到任何包");
             }
@@ -76,9 +92,10 @@ public class MyBatisConfig {
         return typeAliasesPackage;
     }
 
+
     public Resource[] resolveMapperLocations(String[] mapperLocations) {
         ResourcePatternResolver resourceResolver = new PathMatchingResourcePatternResolver();
-        List<Resource> resources = new ArrayList<Resource>();
+        List<Resource> resources = new ArrayList<>();
         if (mapperLocations != null) {
             for (String mapperLocation : mapperLocations) {
                 try {
@@ -89,7 +106,7 @@ public class MyBatisConfig {
                 }
             }
         }
-        return resources.toArray(new Resource[resources.size()]);
+        return resources.toArray(new Resource[0]);
     }
 
     @Bean
@@ -97,6 +114,7 @@ public class MyBatisConfig {
         String typeAliasesPackage = env.getProperty("mybatis.typeAliasesPackage");
         String mapperLocations = env.getProperty("mybatis.mapperLocations");
         String configLocation = env.getProperty("mybatis.configLocation");
+        assert typeAliasesPackage != null;
         typeAliasesPackage = setTypeAliasesPackage(typeAliasesPackage);
         VFS.addImplClass(SpringBootVFS.class);
 
@@ -104,6 +122,7 @@ public class MyBatisConfig {
         sessionFactory.setDataSource(dataSource);
         sessionFactory.setTypeAliasesPackage(typeAliasesPackage);
         sessionFactory.setMapperLocations(resolveMapperLocations(StringUtils.split(mapperLocations, ",")));
+        assert configLocation != null;
         sessionFactory.setConfigLocation(new DefaultResourceLoader().getResource(configLocation));
         return sessionFactory.getObject();
     }

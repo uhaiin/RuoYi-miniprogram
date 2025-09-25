@@ -8,8 +8,8 @@ import com.ruoyi.common.filter.RepeatedlyRequestWrapper;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.http.HttpHelper;
 import com.ruoyi.framework.interceptor.RepeatSubmitInterceptor;
+import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,15 +33,14 @@ public class SameUrlDataInterceptor extends RepeatSubmitInterceptor {
     @Value("${token.header}")
     private String header;
 
-    @Autowired
+    @Resource
     private RedisCache redisCache;
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean isRepeatSubmit(HttpServletRequest request, RepeatSubmit annotation) {
         String nowParams = "";
-        if (request instanceof RepeatedlyRequestWrapper) {
-            RepeatedlyRequestWrapper repeatedlyRequest = (RepeatedlyRequestWrapper) request;
+        if (request instanceof RepeatedlyRequestWrapper repeatedlyRequest) {
             nowParams = HttpHelper.getBodyString(repeatedlyRequest);
         }
 
@@ -49,7 +48,7 @@ public class SameUrlDataInterceptor extends RepeatSubmitInterceptor {
         if (StringUtils.isEmpty(nowParams)) {
             nowParams = JSON.toJSONString(request.getParameterMap());
         }
-        Map<String, Object> nowDataMap = new HashMap<String, Object>();
+        Map<String, Object> nowDataMap = new HashMap<>();
         nowDataMap.put(REPEAT_PARAMS, nowParams);
         nowDataMap.put(REPEAT_TIME, System.currentTimeMillis());
 
@@ -72,7 +71,7 @@ public class SameUrlDataInterceptor extends RepeatSubmitInterceptor {
                 }
             }
         }
-        Map<String, Object> cacheMap = new HashMap<String, Object>();
+        Map<String, Object> cacheMap = new HashMap<>();
         cacheMap.put(url, nowDataMap);
         redisCache.setCacheObject(cacheRepeatKey, cacheMap, annotation.interval(), TimeUnit.MILLISECONDS);
         return false;

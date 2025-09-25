@@ -5,7 +5,7 @@ token:
   # 令牌密钥
   secret: ad05ae01-f977-0fdc-fcd1-95c6e6e7de6e
   # 令牌有效期（默认30分钟）
-  expireTime: 5
+  expireTime: 120
 
 # 防盗链配置
 referer:

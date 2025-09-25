@@ -10,7 +10,7 @@ import com.ruoyi.system.mapper.SysDictDataMapper;
 import com.ruoyi.system.mapper.SysDictTypeMapper;
 import com.ruoyi.system.service.ISysDictTypeService;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,10 +26,10 @@ import java.util.stream.Collectors;
  */
 @Service
 public class SysDictTypeServiceImpl implements ISysDictTypeService {
-    @Autowired
+    @Resource
     private SysDictTypeMapper dictTypeMapper;
 
-    @Autowired
+    @Resource
     private SysDictDataMapper dictDataMapper;
 
     /**
@@ -192,9 +192,9 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService {
      */
     @Override
     public boolean checkDictTypeUnique(SysDictType dict) {
-        Long dictId = StringUtils.isNull(dict.getDictId()) ? -1L : dict.getDictId();
+        long dictId = StringUtils.isNull(dict.getDictId()) ? -1L : dict.getDictId();
         SysDictType dictType = dictTypeMapper.checkDictTypeUnique(dict.getDictType());
-        if (StringUtils.isNotNull(dictType) && dictType.getDictId().longValue() != dictId.longValue()) {
+        if (StringUtils.isNotNull(dictType) && dictType.getDictId() != dictId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;

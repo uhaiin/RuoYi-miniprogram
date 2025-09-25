@@ -25,7 +25,7 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint, S
     @Serial
     private static final long serialVersionUID = -8970718410437077606L;
 
-        /**
+    /**
      * 当用户尝试访问受保护的资源但未通过身份验证时，此方法会被调用
      * 用于处理认证入口点，返回未授权的错误响应
      *

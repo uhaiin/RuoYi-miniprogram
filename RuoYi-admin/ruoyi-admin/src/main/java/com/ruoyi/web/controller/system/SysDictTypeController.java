@@ -12,7 +12,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -24,8 +31,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/system/dict/type")
 public class SysDictTypeController extends BaseController {
+
+    private final ISysDictTypeService dictTypeService;
+
     @Autowired
-    private ISysDictTypeService dictTypeService;
+    public SysDictTypeController(ISysDictTypeService dictTypeService) {
+        this.dictTypeService = dictTypeService;
+    }
 
     @PreAuthorize("@ss.hasPermi('system:dict:list')")
     @GetMapping("/list")
@@ -40,7 +52,7 @@ public class SysDictTypeController extends BaseController {
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysDictType dictType) {
         List<SysDictType> list = dictTypeService.selectDictTypeList(dictType);
-        ExcelUtil<SysDictType> util = new ExcelUtil<SysDictType>(SysDictType.class);
+        ExcelUtil<SysDictType> util = new ExcelUtil<>(SysDictType.class);
         util.exportExcel(response, list, "字典类型");
     }
 

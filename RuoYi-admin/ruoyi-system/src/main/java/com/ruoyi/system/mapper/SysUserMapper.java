@@ -157,6 +157,7 @@ public interface SysUserMapper {
 
     /**
      * 新增微信用户信息
+     *
      * @param sysUser 用户信息
      * @return 影响行数
      */

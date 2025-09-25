@@ -16,11 +16,15 @@ import com.ruoyi.system.mapper.SysRoleMapper;
 import com.ruoyi.system.mapper.SysRoleMenuMapper;
 import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysRoleService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * 角色 业务层处理
@@ -29,16 +33,16 @@ import java.util.*;
  */
 @Service
 public class SysRoleServiceImpl implements ISysRoleService {
-    @Autowired
+    @Resource
     private SysRoleMapper roleMapper;
 
-    @Autowired
+    @Resource
     private SysRoleMenuMapper roleMenuMapper;
 
-    @Autowired
+    @Resource
     private SysUserRoleMapper userRoleMapper;
 
-    @Autowired
+    @Resource
     private SysRoleDeptMapper roleDeptMapper;
 
     /**
@@ -132,9 +136,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public boolean checkRoleNameUnique(SysRole role) {
-        Long roleId = StringUtils.isNull(role.getRoleId()) ? -1L : role.getRoleId();
+        long roleId = StringUtils.isNull(role.getRoleId()) ? -1L : role.getRoleId();
         SysRole info = roleMapper.checkRoleNameUnique(role.getRoleName());
-        if (StringUtils.isNotNull(info) && info.getRoleId().longValue() != roleId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getRoleId() != roleId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -148,9 +152,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     @Override
     public boolean checkRoleKeyUnique(SysRole role) {
-        Long roleId = StringUtils.isNull(role.getRoleId()) ? -1L : role.getRoleId();
+        long roleId = StringUtils.isNull(role.getRoleId()) ? -1L : role.getRoleId();
         SysRole info = roleMapper.checkRoleKeyUnique(role.getRoleKey());
-        if (StringUtils.isNotNull(info) && info.getRoleId().longValue() != roleId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getRoleId() != roleId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -264,14 +268,14 @@ public class SysRoleServiceImpl implements ISysRoleService {
     public int insertRoleMenu(SysRole role) {
         int rows = 1;
         // 新增用户与角色管理
-        List<SysRoleMenu> list = new ArrayList<SysRoleMenu>();
+        List<SysRoleMenu> list = new ArrayList<>();
         for (Long menuId : role.getMenuIds()) {
             SysRoleMenu rm = new SysRoleMenu();
             rm.setRoleId(role.getRoleId());
             rm.setMenuId(menuId);
             list.add(rm);
         }
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             rows = roleMenuMapper.batchRoleMenu(list);
         }
         return rows;
@@ -285,14 +289,14 @@ public class SysRoleServiceImpl implements ISysRoleService {
     public int insertRoleDept(SysRole role) {
         int rows = 1;
         // 新增角色与部门（数据权限）管理
-        List<SysRoleDept> list = new ArrayList<SysRoleDept>();
+        List<SysRoleDept> list = new ArrayList<>();
         for (Long deptId : role.getDeptIds()) {
             SysRoleDept rd = new SysRoleDept();
             rd.setRoleId(role.getRoleId());
             rd.setDeptId(deptId);
             list.add(rd);
         }
-        if (list.size() > 0) {
+        if (!list.isEmpty()) {
             rows = roleDeptMapper.batchRoleDept(list);
         }
         return rows;
@@ -371,7 +375,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     public int insertAuthUsers(Long roleId, Long[] userIds) {
         // 新增用户与角色管理
-        List<SysUserRole> list = new ArrayList<SysUserRole>();
+        List<SysUserRole> list = new ArrayList<>();
         for (Long userId : userIds) {
             SysUserRole ur = new SysUserRole();
             ur.setUserId(userId);

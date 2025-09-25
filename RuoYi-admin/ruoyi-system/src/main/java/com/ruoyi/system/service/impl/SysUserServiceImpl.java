@@ -9,19 +9,22 @@ import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.bean.BeanValidators;
 import com.ruoyi.common.utils.spring.SpringUtils;
-import com.ruoyi.common.utils.uuid.SnowflakeUtil;
 import com.ruoyi.common.utils.uuid.UUID;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
 import com.ruoyi.system.domain.SysUserRole;
-import com.ruoyi.system.mapper.*;
+import com.ruoyi.system.mapper.SysPostMapper;
+import com.ruoyi.system.mapper.SysRoleMapper;
+import com.ruoyi.system.mapper.SysUserMapper;
+import com.ruoyi.system.mapper.SysUserPostMapper;
+import com.ruoyi.system.mapper.SysUserRoleMapper;
 import com.ruoyi.system.service.ISysConfigService;
 import com.ruoyi.system.service.ISysDeptService;
 import com.ruoyi.system.service.ISysUserService;
+import jakarta.annotation.Resource;
 import jakarta.validation.Validator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -40,28 +43,28 @@ import java.util.stream.Collectors;
 public class SysUserServiceImpl implements ISysUserService {
     private static final Logger log = LoggerFactory.getLogger(SysUserServiceImpl.class);
 
-    @Autowired
+    @Resource
     private SysUserMapper userMapper;
 
-    @Autowired
+    @Resource
     private SysRoleMapper roleMapper;
 
-    @Autowired
+    @Resource
     private SysPostMapper postMapper;
 
-    @Autowired
+    @Resource
     private SysUserRoleMapper userRoleMapper;
 
-    @Autowired
+    @Resource
     private SysUserPostMapper userPostMapper;
 
-    @Autowired
+    @Resource
     private ISysConfigService configService;
 
-    @Autowired
+    @Resource
     private ISysDeptService deptService;
 
-    @Autowired
+    @Resource
     protected Validator validator;
 
     /**
@@ -171,9 +174,9 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public boolean checkUserNameUnique(SysUser user) {
-        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
+        long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
         SysUser info = userMapper.checkUserNameUnique(user.getUserName());
-        if (StringUtils.isNotNull(info) && info.getUserId().longValue() != userId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getUserId() != userId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -183,13 +186,12 @@ public class SysUserServiceImpl implements ISysUserService {
      * 校验手机号码是否唯一
      *
      * @param user 用户信息
-     * @return
      */
     @Override
     public boolean checkPhoneUnique(SysUser user) {
-        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
+        long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
         SysUser info = userMapper.checkPhoneUnique(user.getPhonenumber());
-        if (StringUtils.isNotNull(info) && info.getUserId().longValue() != userId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getUserId() != userId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -199,13 +201,12 @@ public class SysUserServiceImpl implements ISysUserService {
      * 校验email是否唯一
      *
      * @param user 用户信息
-     * @return
      */
     @Override
     public boolean checkEmailUnique(SysUser user) {
-        Long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
+        long userId = StringUtils.isNull(user.getUserId()) ? -1L : user.getUserId();
         SysUser info = userMapper.checkEmailUnique(user.getEmail());
-        if (StringUtils.isNotNull(info) && info.getUserId().longValue() != userId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getUserId() != userId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -390,7 +391,7 @@ public class SysUserServiceImpl implements ISysUserService {
         Long[] posts = user.getPostIds();
         if (StringUtils.isNotEmpty(posts)) {
             // 新增用户与岗位管理
-            List<SysUserPost> list = new ArrayList<SysUserPost>(posts.length);
+            List<SysUserPost> list = new ArrayList<>(posts.length);
             for (Long postId : posts) {
                 SysUserPost up = new SysUserPost();
                 up.setUserId(user.getUserId());
@@ -410,7 +411,7 @@ public class SysUserServiceImpl implements ISysUserService {
     public void insertUserRole(Long userId, Long[] roleIds) {
         if (StringUtils.isNotEmpty(roleIds)) {
             // 新增用户与角色管理
-            List<SysUserRole> list = new ArrayList<SysUserRole>(roleIds.length);
+            List<SysUserRole> list = new ArrayList<>(roleIds.length);
             for (Long roleId : roleIds) {
                 SysUserRole ur = new SysUserRole();
                 ur.setUserId(userId);
@@ -467,7 +468,7 @@ public class SysUserServiceImpl implements ISysUserService {
      */
     @Override
     public String importUser(List<SysUser> userList, Boolean isUpdateSupport, String operName) {
-        if (StringUtils.isNull(userList) || userList.size() == 0) {
+        if (StringUtils.isNull(userList) || userList.isEmpty()) {
             throw new ServiceException("导入用户数据不能为空！");
         }
         int successNum = 0;
@@ -486,8 +487,8 @@ public class SysUserServiceImpl implements ISysUserService {
                     user.setCreateBy(operName);
                     userMapper.insertUser(user);
                     successNum++;
-                    successMsg.append("<br/>" + successNum + "、账号 " + user.getUserName() + " 导入成功");
-                } else if (isUpdateSupport) {
+                    successMsg.append("<br/>").append(successNum).append("、账号 ").append(user.getUserName()).append(" 导入成功");
+                } else if (Boolean.TRUE.equals(isUpdateSupport)) {
                     BeanValidators.validateWithException(validator, user);
                     checkUserAllowed(u);
                     checkUserDataScope(u.getUserId());
@@ -497,15 +498,15 @@ public class SysUserServiceImpl implements ISysUserService {
                     user.setUpdateBy(operName);
                     userMapper.updateUser(user);
                     successNum++;
-                    successMsg.append("<br/>" + successNum + "、账号 " + user.getUserName() + " 更新成功");
+                    successMsg.append("<br/>").append(successNum).append("、账号 ").append(user.getUserName()).append(" 更新成功");
                 } else {
                     failureNum++;
-                    failureMsg.append("<br/>" + failureNum + "、账号 " + user.getUserName() + " 已存在");
+                    failureMsg.append("<br/>").append(failureNum).append("、账号 ").append(user.getUserName()).append(" 已存在");
                 }
             } catch (Exception e) {
                 failureNum++;
                 String msg = "<br/>" + failureNum + "、账号 " + user.getUserName() + " 导入失败：";
-                failureMsg.append(msg + e.getMessage());
+                failureMsg.append(msg).append(e.getMessage());
                 log.error(msg, e);
             }
         }
@@ -518,23 +519,38 @@ public class SysUserServiceImpl implements ISysUserService {
         return successMsg.toString();
     }
 
+    /**
+     * 注册微信用户
+     *
+     * @param openid 微信用户的唯一标识
+     * @return 注册成功的系统用户对象
+     */
     @Override
     public SysUser registerWeChatUser(String openid) {
-        SysUser sysUser = new SysUser();
-        sysUser.setOpenid(openid);
+        // 创建系统用户对象并设置基本信息
+        SysUser wechatUser = new SysUser();
+        wechatUser.setOpenid(openid);
         String name = UUID.fastUUID().toString().substring(0, 8);
-        sysUser.setUserName(name);
-        sysUser.setNickName(name);
-        sysUser.setCreateBy("sys");
-        sysUser.setCreateTime(new Date());
-        sysUser.setUpdateTime(new Date());
-        sysUser.setRemark("微信小程序用户");
-        long uid = SnowflakeUtil.nextId();
-        sysUser.setUserId(uid);
-        int i = userMapper.insertWeChatUser(sysUser);
+        wechatUser.setUserName(name);
+        wechatUser.setNickName(name);
+        wechatUser.setDeptId(4L);
+        wechatUser.setCreateBy("sys");
+        wechatUser.setCreateTime(new Date());
+        wechatUser.setUpdateTime(new Date());
+        wechatUser.setRemark("微信小程序用户");
+
+        int i = userMapper.insertWeChatUser(wechatUser);
         if (i > 0) {
-            log.info("成功创建微信小程序用户 ==> {}", uid);
+            wechatUser.setPostIds(new Long[]{3L});
+            wechatUser.setRoleIds(new Long[]{3L});
+
+            // 新增用户岗位关联
+            insertUserPost(wechatUser);
+            // 新增用户与角色管理
+            insertUserRole(wechatUser);
+            log.info("成功创建微信小程序用户 ==> {}", openid);
         }
-        return sysUser;
+        return wechatUser;
     }
+
 }

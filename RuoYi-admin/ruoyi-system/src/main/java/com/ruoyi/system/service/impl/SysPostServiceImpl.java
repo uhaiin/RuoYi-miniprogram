@@ -7,7 +7,7 @@ import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.mapper.SysPostMapper;
 import com.ruoyi.system.mapper.SysUserPostMapper;
 import com.ruoyi.system.service.ISysPostService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,10 +19,10 @@ import java.util.List;
  */
 @Service
 public class SysPostServiceImpl implements ISysPostService {
-    @Autowired
+    @Resource
     private SysPostMapper postMapper;
 
-    @Autowired
+    @Resource
     private SysUserPostMapper userPostMapper;
 
     /**
@@ -76,9 +76,9 @@ public class SysPostServiceImpl implements ISysPostService {
      */
     @Override
     public boolean checkPostNameUnique(SysPost post) {
-        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
+        long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
         SysPost info = postMapper.checkPostNameUnique(post.getPostName());
-        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getPostId() != postId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;
@@ -92,9 +92,9 @@ public class SysPostServiceImpl implements ISysPostService {
      */
     @Override
     public boolean checkPostCodeUnique(SysPost post) {
-        Long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
+        long postId = StringUtils.isNull(post.getPostId()) ? -1L : post.getPostId();
         SysPost info = postMapper.checkPostCodeUnique(post.getPostCode());
-        if (StringUtils.isNotNull(info) && info.getPostId().longValue() != postId.longValue()) {
+        if (StringUtils.isNotNull(info) && info.getPostId() != postId) {
             return UserConstants.NOT_UNIQUE;
         }
         return UserConstants.UNIQUE;

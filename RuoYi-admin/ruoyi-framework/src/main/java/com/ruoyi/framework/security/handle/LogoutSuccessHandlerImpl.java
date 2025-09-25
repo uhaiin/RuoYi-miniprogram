@@ -10,10 +10,10 @@ import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.framework.manager.AsyncManager;
 import com.ruoyi.framework.manager.factory.AsyncFactory;
 import com.ruoyi.framework.web.service.TokenService;
+import jakarta.annotation.Resource;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
@@ -27,17 +27,22 @@ import java.io.IOException;
  */
 @Configuration
 public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
-    @Autowired
+    @Resource
     private TokenService tokenService;
 
     /**
      * 退出处理
      *
-     * @return
+     * @param request HTTP请求对象
+     * @param response HTTP响应对象
+     * @param authentication 认证信息对象
+     * @throws IOException IO异常
+     * @throws ServletException Servlet异常
      */
     @Override
     public void onLogoutSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
             throws IOException, ServletException {
+        // 获取登录用户信息
         LoginUser loginUser = tokenService.getLoginUser(request);
         if (StringUtils.isNotNull(loginUser)) {
             String userName = loginUser.getUsername();
@@ -46,6 +51,8 @@ public class LogoutSuccessHandlerImpl implements LogoutSuccessHandler {
             // 记录用户退出日志
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(userName, Constants.LOGOUT, MessageUtils.message("user.logout.success")));
         }
+        // 返回退出成功响应
         ServletUtils.renderString(response, JSON.toJSONString(AjaxResult.success(MessageUtils.message("user.logout.success"))));
     }
+
 }

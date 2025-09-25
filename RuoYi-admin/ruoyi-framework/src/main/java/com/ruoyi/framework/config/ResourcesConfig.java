@@ -3,7 +3,7 @@ package com.ruoyi.framework.config;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.Constants;
 import com.ruoyi.framework.interceptor.RepeatSubmitInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.CacheControl;
@@ -23,20 +23,27 @@ import java.util.concurrent.TimeUnit;
  */
 @Configuration
 public class ResourcesConfig implements WebMvcConfigurer {
-    @Autowired
+    @Resource
     private RepeatSubmitInterceptor repeatSubmitInterceptor;
 
+    /**
+     * 添加静态资源处理器
+     * 用于配置静态资源的访问映射规则
+     *
+     * @param registry 资源处理器注册器，用于注册静态资源处理规则
+     */
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        /** 本地文件上传路径 */
+        /** 配置本地文件上传路径的静态资源映射 */
         registry.addResourceHandler(Constants.RESOURCE_PREFIX + "/**")
                 .addResourceLocations("file:" + RuoYiConfig.getProfile() + "/");
 
-        /** swagger配置 */
+        /** 配置swagger-ui的静态资源映射 */
         registry.addResourceHandler("/swagger-ui/**")
                 .addResourceLocations("classpath:/META-INF/resources/webjars/springfox-swagger-ui/")
                 .setCacheControl(CacheControl.maxAge(5, TimeUnit.HOURS).cachePublic());
     }
+
 
     /**
      * 自定义拦截规则

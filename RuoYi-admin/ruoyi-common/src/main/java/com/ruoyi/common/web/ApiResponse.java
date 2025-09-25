@@ -1,6 +1,7 @@
 package com.ruoyi.common.web;
 
 import com.ruoyi.common.enums.ApiResponseEnum;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +16,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@Schema(description = "微信请求结果封装")
 public class ApiResponse<T> implements Serializable {
 
     /**
@@ -30,26 +32,31 @@ public class ApiResponse<T> implements Serializable {
     /**
      * 是否成功
      */
+    @Schema(title = "是否请求成功")
     protected boolean success = true;
 
     /**
      * 请求结果代码
      */
+    @Schema(title = "请求结果代码")
     private Integer code = ApiResponseEnum.SUCCESS.code;
 
     /**
      * 请求结果消息
      */
+    @Schema(title = "请求结果消息")
     private String message = ApiResponseEnum.SUCCESS.message;
 
     /**
      * 请求结果数据
      */
+    @Schema(title = "请求结果数据")
     private T data;
 
     /**
      * 请求时候的时间戳
      */
+    @Schema(title = "请求时间戳")
     private Long timestamp = System.currentTimeMillis();
 
     /**

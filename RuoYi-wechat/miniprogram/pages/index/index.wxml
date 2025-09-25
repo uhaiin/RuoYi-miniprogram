@@ -1,1 +1,19 @@
-<view>hello world</view>
+<van-tabs swipeable active="{{ active }}" bind:click="switchCategory">
+  <van-tab animated wx:for="{{categories}}" wx:key="*this" data-category="{{item}}" title="{{item}}"></van-tab>
+</van-tabs>
+
+<!-- 文章列表 -->
+<view class="article-list">
+  <view wx:for="{{articles[currentCategory]}}" wx:key="index" class="container">
+    <view class="top-row">
+      <!-- 动态绑定标签类型 -->
+      <van-tag mark type="{{item.tagType}}" class="tag">
+        {{item.tag}}
+      </van-tag>
+      <view class="title">{{item.title}}</view>
+    </view>
+    <view class="stats">
+      点赞 {{item.likes}} ｜ 浏览 {{item.views}} ｜ 收藏 {{item.collections}}
+    </view>
+  </view>
+</view>

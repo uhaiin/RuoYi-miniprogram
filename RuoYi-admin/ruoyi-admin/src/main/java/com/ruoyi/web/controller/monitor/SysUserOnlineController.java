@@ -13,7 +13,11 @@ import com.ruoyi.system.domain.SysUserOnline;
 import com.ruoyi.system.service.ISysUserOnlineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,17 +32,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/monitor/online")
 public class SysUserOnlineController extends BaseController {
-    @Autowired
-    private ISysUserOnlineService userOnlineService;
+    private final ISysUserOnlineService userOnlineService;
+
+    private final RedisCache redisCache;
 
     @Autowired
-    private RedisCache redisCache;
+    public SysUserOnlineController(ISysUserOnlineService userOnlineService, RedisCache redisCache) {
+        this.userOnlineService = userOnlineService;
+        this.redisCache = redisCache;
+    }
 
     @PreAuthorize("@ss.hasPermi('monitor:online:list')")
     @GetMapping("/list")
     public TableDataInfo list(String ipaddr, String userName) {
         Collection<String> keys = redisCache.keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
-        List<SysUserOnline> userOnlineList = new ArrayList<SysUserOnline>();
+        List<SysUserOnline> userOnlineList = new ArrayList<>();
         for (String key : keys) {
             LoginUser user = redisCache.getCacheObject(key);
             if (StringUtils.isNotEmpty(ipaddr) && StringUtils.isNotEmpty(userName)) {

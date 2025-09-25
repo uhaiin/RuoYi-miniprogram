@@ -14,7 +14,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +34,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/system/dict/data")
 public class SysDictDataController extends BaseController {
-    @Autowired
-    private ISysDictDataService dictDataService;
+    private final ISysDictDataService dictDataService;
+
+    private final ISysDictTypeService dictTypeService;
 
     @Autowired
-    private ISysDictTypeService dictTypeService;
+    public SysDictDataController(ISysDictDataService dictDataService, ISysDictTypeService dictTypeService) {
+        this.dictDataService = dictDataService;
+        this.dictTypeService = dictTypeService;
+    }
 
     @PreAuthorize("@ss.hasPermi('system:dict:list')")
     @GetMapping("/list")
@@ -46,7 +57,7 @@ public class SysDictDataController extends BaseController {
     @PostMapping("/export")
     public void export(HttpServletResponse response, SysDictData dictData) {
         List<SysDictData> list = dictDataService.selectDictDataList(dictData);
-        ExcelUtil<SysDictData> util = new ExcelUtil<SysDictData>(SysDictData.class);
+        ExcelUtil<SysDictData> util = new ExcelUtil<>(SysDictData.class);
         util.exportExcel(response, list, "字典数据");
     }
 
@@ -66,7 +77,7 @@ public class SysDictDataController extends BaseController {
     public AjaxResult dictType(@PathVariable String dictType) {
         List<SysDictData> data = dictTypeService.selectDictDataByType(dictType);
         if (StringUtils.isNull(data)) {
-            data = new ArrayList<SysDictData>();
+            data = new ArrayList<>();
         }
         return success(data);
     }

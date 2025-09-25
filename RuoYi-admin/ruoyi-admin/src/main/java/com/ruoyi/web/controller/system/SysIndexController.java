@@ -16,8 +16,12 @@ public class SysIndexController {
     /**
      * 系统基础配置
      */
+    private final RuoYiConfig ruoyiConfig;
+
     @Autowired
-    private RuoYiConfig ruoyiConfig;
+    public SysIndexController(RuoYiConfig ruoyiConfig) {
+        this.ruoyiConfig = ruoyiConfig;
+    }
 
     /**
      * 访问首页，提示语
