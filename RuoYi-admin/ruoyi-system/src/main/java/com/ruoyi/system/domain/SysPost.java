@@ -6,15 +6,22 @@ import com.ruoyi.common.core.domain.BaseEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+
+import java.io.Serial;
 
 /**
  * 岗位表 sys_post
  *
  * @author ruoyi
  */
+@Setter
+@Getter
 public class SysPost extends BaseEntity {
+    @Serial
     private static final long serialVersionUID = 1L;
 
     /**
@@ -52,22 +59,10 @@ public class SysPost extends BaseEntity {
      */
     private boolean flag = false;
 
-    public Long getPostId() {
-        return postId;
-    }
-
-    public void setPostId(Long postId) {
-        this.postId = postId;
-    }
-
     @NotBlank(message = "岗位编码不能为空")
     @Size(min = 0, max = 64, message = "岗位编码长度不能超过64个字符")
     public String getPostCode() {
         return postCode;
-    }
-
-    public void setPostCode(String postCode) {
-        this.postCode = postCode;
     }
 
     @NotBlank(message = "岗位名称不能为空")
@@ -76,33 +71,9 @@ public class SysPost extends BaseEntity {
         return postName;
     }
 
-    public void setPostName(String postName) {
-        this.postName = postName;
-    }
-
     @NotNull(message = "显示顺序不能为空")
     public Integer getPostSort() {
         return postSort;
-    }
-
-    public void setPostSort(Integer postSort) {
-        this.postSort = postSort;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public boolean isFlag() {
-        return flag;
-    }
-
-    public void setFlag(boolean flag) {
-        this.flag = flag;
     }
 
     @Override
